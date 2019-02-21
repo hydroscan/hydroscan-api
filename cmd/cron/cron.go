@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/hydroscan/hydroscan-api/models"
+	"github.com/hydroscan/hydroscan-api/redis"
 	"github.com/hydroscan/hydroscan-api/task"
 	"github.com/jasonlvhit/gocron"
 	_ "github.com/joho/godotenv/autoload"
@@ -25,16 +26,20 @@ func safeTask(fn taskType) taskType {
 func main() {
 	models.Connect()
 	defer models.Close()
+	redis.Connect()
 	task.InitEthClient()
 
 	log.Info("cron running")
-
-	// Fetch a mass of missing logs before cron task
-	// task.FetchHistoricalLogs()
-
-	// gocron.Every(1).Minutes().Do(safeTask(task.FetchHistoricalLogs))
 	gocron.Every(5).Minutes().Do(safeTask(task.UpdateTokenPrices))
 	gocron.Every(1).Day().Do(safeTask(task.UpdateRelayers))
+
+	gocron.Every(30).Minutes().Do(safeTask(task.UpdateTokenVolume24h))
+	gocron.Every(60).Minutes().Do(safeTask(task.UpdateTokenVolume7d))
+	gocron.Every(60).Minutes().Do(safeTask(task.UpdateTokenVolumeAll))
+
+	// Update Trade PriceUSD and VolumeUSD which is nil
+	gocron.Every(60).Minutes().Do(safeTask(task.UpdateHistoryTradePrice))
+	gocron.Every(60).Minutes().Do(safeTask(task.UpdateOnlyVolumeUSD))
 
 	_, time := gocron.NextRun()
 	log.Info(time)

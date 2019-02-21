@@ -18,6 +18,7 @@ type Trade struct {
 	LogIndex           uint            `gorm:"column:log_index;;unique_index:idx_block_number_log_index" json:"logIndex"`
 	Date               time.Time       `gorm:"column:date;index" json:"date"`
 	QuoteTokenPriceUSD decimal.Decimal `gorm:"column:quote_token_price_usd;type:decimal(32,18)" json:"quoteTokenPriceUSD"`
+	VolumeUSD          decimal.Decimal `gorm:"column:volume_usd;type:decimal(32,18)" json:"volumeUSD"`
 	BaseTokenAddress   string          `gorm:"column:base_token_address;index" json:"baseTokenAddress"`
 	QuoteTokenAddress  string          `gorm:"column:quote_token_address;index" json:"quoteTokenAddress"`
 	RelayerAddress     string          `gorm:"column:relayer_address;index" json:"relayerAddress"`

@@ -51,6 +51,8 @@ func FetchHistoricalLogs() {
 	if fromBlock+pageSize >= lastBlock {
 		fetchLogs(int64(fromBlock), int64(lastBlock))
 	}
+
+	UpdateHistoryTradePrice()
 }
 
 func fetchLogs(fromBlock int64, toBlock int64) {
@@ -90,20 +92,29 @@ func saveEventLog(eventLog types.Log) {
 		quoteToken := GetToken(match.QuoteToken.Hex())
 		blockTime := getBlockTime(eventLog.BlockNumber)
 
+		quoteTokenAmount := decimal.NewFromBigInt(match.QuoteTokenAmount, int32(-quoteToken.Decimals))
+		quoteTokenPriceUSD := quoteToken.PriceUSD
+		date := time.Unix(int64(blockTime), 0)
+		// if duration is too long unset price now. fetch price later.
+		if time.Now().Sub(date) > 3600 {
+			quoteTokenPriceUSD = decimal.New(0, 0)
+		}
+
 		mTrade = models.Trade{
 			BlockNumber:        eventLog.BlockNumber,
 			BlockHash:          eventLog.BlockHash.Hex(),
 			TransactionHash:    eventLog.TxHash.Hex(),
 			LogIndex:           eventLog.Index,
-			Date:               time.Unix(int64(blockTime), 0),
-			QuoteTokenPriceUSD: quoteToken.PriceUSD,
+			Date:               date,
+			QuoteTokenPriceUSD: quoteTokenPriceUSD,
+			VolumeUSD:          quoteTokenPriceUSD.Mul(quoteTokenAmount),
 			BaseTokenAddress:   baseToken.Address,
 			QuoteTokenAddress:  quoteToken.Address,
 			RelayerAddress:     match.Relayer.Hex(),
 			MakerAddress:       match.Maker.Hex(),
 			TakerAddress:       match.Taker.Hex(),
 			BaseTokenAmount:    decimal.NewFromBigInt(match.BaseTokenAmount, int32(-baseToken.Decimals)),
-			QuoteTokenAmount:   decimal.NewFromBigInt(match.QuoteTokenAmount, int32(-quoteToken.Decimals)),
+			QuoteTokenAmount:   quoteTokenAmount,
 			MakerFee:           decimal.NewFromBigInt(match.MakerFee, int32(-quoteToken.Decimals)),
 			TakerFee:           decimal.NewFromBigInt(match.TakerFee, int32(-quoteToken.Decimals)),
 			MakerGasFee:        decimal.NewFromBigInt(match.MakerGasFee, int32(-quoteToken.Decimals)),

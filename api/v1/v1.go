@@ -9,9 +9,12 @@ func ApplyRoutes(r *gin.RouterGroup) {
 	{
 		v1.GET("/tokens", GetTokens)
 		v1.GET("/tokens/:address", GetToken)
+
 		v1.GET("/relayers", GetRelayers)
 		v1.GET("/relayers/:slug", GetRelayer)
+
 		v1.GET("/trades", GetTrades)
+		v1.GET("/trades_latest", GetTradesLatest)
 		v1.GET("/trades/:uuid", GetTrade)
 	}
 }

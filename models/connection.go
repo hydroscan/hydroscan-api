@@ -21,7 +21,8 @@ func Connect() {
 	// AutoMigrate will ONLY create tables, missing columns and missing indexes,
 	// and WON’T change existing column’s type or delete unused columns to protect your data.
 	DB.AutoMigrate(&Relayer{}, &Token{}, &Trade{})
-	// DB.LogMode(true)
+	DB.LogMode(true)
+	log.Info("DB Connected")
 }
 
 func Close() error {

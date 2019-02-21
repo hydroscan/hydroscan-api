@@ -26,6 +26,17 @@ func GetTrades(c *gin.Context) {
 	}
 }
 
+func GetTradesLatest(c *gin.Context) {
+	pageSize := 8
+	offset := 0
+	var trades []models.Trade
+	if err := models.DB.Order("block_number desc").Order("log_index desc").Offset(offset).Limit(pageSize).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").Find(&trades).Error; gorm.IsRecordNotFoundError(err) {
+		c.AbortWithStatus(404)
+	} else {
+		c.JSON(200, trades)
+	}
+}
+
 func GetTrade(c *gin.Context) {
 	uuid := c.Params.ByName("uuid")
 	trade := models.Trade{}
