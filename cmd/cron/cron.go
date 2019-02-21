@@ -37,6 +37,7 @@ func main() {
 	gocron.Every(60).Minutes().Do(safeTask(task.UpdateTokenVolume7d))
 	gocron.Every(60).Minutes().Do(safeTask(task.UpdateTokenVolumeAll))
 
+	gocron.Every(60).Minutes().Do(safeTask(task.UpdateIndicators))
 	// Update Trade PriceUSD and VolumeUSD which is nil
 	gocron.Every(60).Minutes().Do(safeTask(task.UpdateHistoryTradePrice))
 	gocron.Every(60).Minutes().Do(safeTask(task.UpdateOnlyVolumeUSD))

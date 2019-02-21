@@ -2,10 +2,15 @@ package apiv1
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hydroscan/hydroscan-api/internal/json"
 	"github.com/hydroscan/hydroscan-api/models"
+	"github.com/hydroscan/hydroscan-api/redis"
+	"github.com/hydroscan/hydroscan-api/task"
 	"github.com/jinzhu/gorm"
+	"github.com/shopspring/decimal"
 )
 
 func GetTrades(c *gin.Context) {
@@ -45,4 +50,44 @@ func GetTrade(c *gin.Context) {
 	} else {
 		c.JSON(200, trade)
 	}
+}
+
+func GetTradesChart(c *gin.Context) {
+	period := c.DefaultQuery("period", "1M")
+	var res []struct {
+		Dt    time.Time       `json:"date"`
+		Sum   decimal.Decimal `json:"volume"`
+		Count int             `json:"trades"`
+	}
+	trunc := "day"
+	from := time.Now().Add(-30 * 24 * time.Hour)
+	switch period {
+	case "24H":
+		trunc = "hour"
+		from = time.Now().Add(-24 * time.Hour)
+	case "7D":
+		trunc = "hour"
+		from = time.Now().Add(-7 * 24 * time.Hour)
+	case "1M":
+		trunc = "day"
+		from = time.Now().Add(-30 * 24 * time.Hour)
+	case "1Y":
+		trunc = "day"
+		from = time.Now().Add(-365 * 24 * time.Hour)
+	case "ALL":
+		trunc = "day"
+		from = time.Now().Add(-1000 * 24 * time.Hour)
+	}
+	models.DB.Raw("select date_trunc(?, date) as dt, sum(volume_usd), count(1) from trades where date >= ? group by dt order by dt", trunc, from).Scan(&res)
+	c.JSON(200, res)
+}
+
+func GetTradesIndicators(c *gin.Context) {
+	res, err := redis.Client.Get("indicators").Result()
+	if err != nil {
+		panic(err)
+	}
+	indicators := task.Indicators{}
+	json.Unmarshal([]byte(res), &indicators)
+	c.JSON(200, indicators)
 }
