@@ -102,7 +102,7 @@ func saveEventLog(eventLog types.Log) {
 		quoteTokenPriceUSD := quoteToken.PriceUSD
 		date := time.Unix(int64(blockTime), 0)
 		// if duration is too long unset price now. fetch history price later.
-		if time.Now().Sub(date) > 3600 {
+		if time.Now().Sub(date) > time.Hour {
 			quoteTokenPriceUSD = decimal.New(0, 0)
 		}
 
