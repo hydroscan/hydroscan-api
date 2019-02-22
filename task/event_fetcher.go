@@ -78,6 +78,12 @@ func fetchLogs(fromBlock int64, toBlock int64) {
 }
 
 func saveEventLog(eventLog types.Log) {
+	log.Info("saveEventLog", eventLog.BlockNumber, eventLog.Index)
+	if eventLog.Removed {
+		log.Info("event log Removed ")
+		return
+	}
+
 	mTrade := models.Trade{}
 
 	if err := models.DB.Where("block_number = ? and log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
@@ -95,7 +101,7 @@ func saveEventLog(eventLog types.Log) {
 		quoteTokenAmount := decimal.NewFromBigInt(match.QuoteTokenAmount, int32(-quoteToken.Decimals))
 		quoteTokenPriceUSD := quoteToken.PriceUSD
 		date := time.Unix(int64(blockTime), 0)
-		// if duration is too long unset price now. fetch price later.
+		// if duration is too long unset price now. fetch history price later.
 		if time.Now().Sub(date) > 3600 {
 			quoteTokenPriceUSD = decimal.New(0, 0)
 		}

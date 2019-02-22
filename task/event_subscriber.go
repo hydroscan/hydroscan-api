@@ -11,18 +11,18 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-const RetryNumber = 3
+const MaxReties = 3
 
 func SubscribeLogs() {
 	FetchHistoricalLogs()
 
 	var client *ethclient.Client
 	var err error
-	dialRetry := RetryNumber
+	dialRetries := MaxReties
 
-	for dialRetry == RetryNumber || (err != nil && dialRetry > 0) {
+	for dialRetries == MaxReties || (err != nil && dialRetries > 0) {
 		client, err = ethclient.Dial(os.Getenv("WEB3_WS"))
-		dialRetry -= 1
+		dialRetries -= 1
 	}
 	if err != nil {
 		panic(err)
@@ -44,10 +44,10 @@ func SubscribeLogs() {
 		case err := <-sub.Err():
 			log.Warn(err)
 
-			dialRetry = RetryNumber
-			for err != nil && dialRetry > 0 {
+			dialRetries = MaxReties
+			for err != nil && dialRetries > 0 {
 				client, err = ethclient.Dial(os.Getenv("WEB3_WS"))
-				dialRetry -= 1
+				dialRetries -= 1
 			}
 			if err != nil {
 				panic(err)

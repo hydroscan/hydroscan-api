@@ -20,9 +20,6 @@ type RelayerInfo struct {
 func UpdateRelayers() {
 	log.Info("UpdateRelayers")
 
-	models.Connect()
-	defer models.Close()
-
 	relayers := getRelayers()
 	log.Info(relayers)
 

@@ -42,7 +42,11 @@ func main() {
 	gocron.Every(60).Minutes().Do(safeTask(task.UpdateHistoryTradePrice))
 	gocron.Every(60).Minutes().Do(safeTask(task.UpdateOnlyVolumeUSD))
 
+	// first time start run all tasks right now
+	gocron.RunAll()
+
 	_, time := gocron.NextRun()
-	log.Info(time)
+	log.Info("next corn: ", time)
+	// Starts the schedule as per normal
 	<-gocron.Start()
 }
