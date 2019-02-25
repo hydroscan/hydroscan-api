@@ -53,7 +53,7 @@ func GetTrade(c *gin.Context) {
 }
 
 func GetTradesChart(c *gin.Context) {
-	period := c.DefaultQuery("period", "1M")
+	filter := c.DefaultQuery("filter", "1M")
 	var res []struct {
 		Dt    time.Time       `json:"date"`
 		Sum   decimal.Decimal `json:"volume"`
@@ -61,7 +61,7 @@ func GetTradesChart(c *gin.Context) {
 	}
 	trunc := "day"
 	from := time.Now().Add(-30 * 24 * time.Hour)
-	switch period {
+	switch filter {
 	case "24H":
 		trunc = "hour"
 		from = time.Now().Add(-24 * time.Hour)
@@ -77,6 +77,9 @@ func GetTradesChart(c *gin.Context) {
 	case "ALL":
 		trunc = "day"
 		from = time.Now().Add(-1000 * 24 * time.Hour)
+	default:
+		c.AbortWithStatus(404)
+		return
 	}
 	models.DB.Raw("select date_trunc(?, date) as dt, sum(volume_usd), count(1) from trades where date >= ? group by dt order by dt", trunc, from).Scan(&res)
 	c.JSON(200, res)

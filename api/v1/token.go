@@ -27,11 +27,19 @@ func GetTokens(c *gin.Context) {
 }
 
 func GetTokensTop(c *gin.Context) {
-	orderQuery := c.DefaultQuery("order", "volume_24h")
+	filter := c.DefaultQuery("filter", "24H")
 
 	order := "volume_24h desc"
-	if orderQuery == "volume_24h" || orderQuery == "volume_7d" || orderQuery == "volume_all" {
-		order = orderQuery + " desc"
+	switch filter {
+	case "24H":
+		order = "volume_24h desc"
+	case "7D":
+		order = "volume_7D desc"
+	case "ALL":
+		order = "volume_all desc"
+	default:
+		c.AbortWithStatus(404)
+		return
 	}
 
 	pageSize := 10
