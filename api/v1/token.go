@@ -34,7 +34,7 @@ func GetTokensTop(c *gin.Context) {
 	case "24H":
 		order = "volume_24h desc"
 	case "7D":
-		order = "volume_7D desc"
+		order = "volume_7d desc"
 	case "ALL":
 		order = "volume_all desc"
 	default:
