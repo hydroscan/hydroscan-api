@@ -1,6 +1,7 @@
 package apiv1
 
 import (
+	"math"
 	"strconv"
 	"time"
 
@@ -27,7 +28,17 @@ func GetTrades(c *gin.Context) {
 	if err := models.DB.Order("block_number desc").Order("log_index desc").Offset(offset).Limit(pageSize).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").Find(&trades).Error; gorm.IsRecordNotFoundError(err) {
 		c.AbortWithStatus(404)
 	} else {
-		c.JSON(200, trades)
+		type resType struct {
+			Page      int            `json:"page"`
+			TotalPage int            `json:"totalPage"`
+			Trades    []models.Trade `json:"trades"`
+		}
+		res := resType{page, 0, trades}
+		totalCount := 0
+		models.DB.Table("trades").Count(&totalCount)
+		res.TotalPage = int(math.Ceil(float64(totalCount) / float64(pageSize)))
+
+		c.JSON(200, res)
 	}
 }
 

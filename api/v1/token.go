@@ -1,6 +1,7 @@
 package apiv1
 
 import (
+	"math"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,17 @@ func GetTokens(c *gin.Context) {
 	if err := models.DB.Offset(offset).Limit(pageSize).Find(&tokens).Error; gorm.IsRecordNotFoundError(err) {
 		c.AbortWithStatus(404)
 	} else {
-		c.JSON(200, tokens)
+		type resType struct {
+			Page      int            `json:"page"`
+			TotalPage int            `json:"totalPage"`
+			Tokens    []models.Token `json:"tokens"`
+		}
+		res := resType{page, 0, tokens}
+		totalCount := 0
+		models.DB.Table("tokens").Count(&totalCount)
+		res.TotalPage = int(math.Ceil(float64(totalCount) / float64(pageSize)))
+
+		c.JSON(200, res)
 	}
 }
 
