@@ -21,7 +21,7 @@ func GetTrades(c *gin.Context) {
 	if err != nil {
 		page = 1
 	}
-	pageSize := 20
+	pageSize := 25
 	offset := (page - 1) * pageSize
 
 	var trades []models.Trade
@@ -30,11 +30,12 @@ func GetTrades(c *gin.Context) {
 	} else {
 		type resType struct {
 			Page      int            `json:"page"`
+			PageSize  int            `json:"pageSize"`
 			TotalPage int            `json:"totalPage"`
 			Count     uint64         `json:"count"`
 			Trades    []models.Trade `json:"trades"`
 		}
-		res := resType{page, 0, 0, trades}
+		res := resType{page, pageSize, 0, 0, trades}
 		models.DB.Table("trades").Count(&res.Count)
 		res.TotalPage = int(math.Ceil(float64(res.Count) / float64(pageSize)))
 
