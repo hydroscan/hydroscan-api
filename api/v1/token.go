@@ -14,7 +14,7 @@ func GetTokens(c *gin.Context) {
 	i, err := strconv.ParseInt(pageQuery, 10, 64)
 	page := int(i)
 	if err != nil {
-		page = 0
+		page = 1
 	}
 	pageSize := 20
 	offset := (page - 1) * pageSize
