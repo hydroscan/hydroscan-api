@@ -45,7 +45,7 @@ func GetTradesLatest(c *gin.Context) {
 func GetTrade(c *gin.Context) {
 	uuid := c.Params.ByName("uuid")
 	trade := models.Trade{}
-	if err := models.DB.Where("uuid = ?", uuid).First(&trade).Error; gorm.IsRecordNotFoundError(err) {
+	if err := models.DB.Where("uuid = ?", uuid).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").First(&trade).Error; gorm.IsRecordNotFoundError(err) {
 		c.AbortWithStatus(404)
 	} else {
 		c.JSON(200, trade)
