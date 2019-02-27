@@ -17,10 +17,11 @@ type TradesQuery struct {
 	PageSize          int    `form:"pageSize"`
 	BaseTokenAddress  string `form:"baseTokenAddress"`
 	QuoteTokenAddress string `form:"quoteTokenAddress"`
+	TokenAddress      string `form:"tokenAddress"`
 }
 
 func GetTrades(c *gin.Context) {
-	query := TradesQuery{1, 25, "", ""}
+	query := TradesQuery{1, 25, "", "", ""}
 	c.BindQuery(&query)
 
 	page := query.Page
@@ -28,7 +29,13 @@ func GetTrades(c *gin.Context) {
 	offset := (page - 1) * pageSize
 
 	var trades []models.Trade
-	if err := models.DB.Order("block_number desc").Order("log_index desc").Offset(offset).Limit(pageSize).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").Find(&trades).Error; gorm.IsRecordNotFoundError(err) {
+	statment := models.DB.Order("block_number desc").Order("log_index desc").Offset(offset).Limit(pageSize)
+	if query.BaseTokenAddress != "" && query.QuoteTokenAddress != "" {
+		statment = statment.Where("base_token_address = ? AND quote_token_address = ?", query.BaseTokenAddress, query.QuoteTokenAddress)
+	} else if query.TokenAddress != "" {
+		statment = statment.Where("base_token_address = ? OR quote_token_address = ?", query.TokenAddress, query.TokenAddress)
+	}
+	if err := statment.Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").Find(&trades).Error; gorm.IsRecordNotFoundError(err) {
 		c.AbortWithStatus(404)
 	} else {
 		type resType struct {
@@ -86,16 +93,17 @@ func GetTradesChart(c *gin.Context) {
 	}
 	models.DB.Raw(`SELECT date_trunc(?, date) AS dt, sum(volume_usd), count(*) AS trades_count
 		FROM trades WHERE date >= ? GROUP BY dt ORDER BY dt`, trunc, from).Scan(&res)
+
 	var resTraders []struct {
 		TradersCount uint64 `json:"traders"`
 	}
-
 	// select traders
 	// SELECT dt, count(*) FROM (SELECT date_trunc('hour', date) AS dt, maker_address FROM trades WHERE date > '2019-02-26t00:00:00+08:00'UNION SELECT date_trunc('hour', date) AS dt, taker_address FROM trades WHERE date > '2019-02-26t00:00:00+08:00' ) AS traders GROUP BY dt ORDER BY dt;
 	models.DB.Raw(`SELECT dt, count(*) AS traders_count
 		FROM (
 		SELECT date_trunc(?, date) AS dt, maker_address FROM trades WHERE date > ?
-		UNION SELECT date_trunc(?, date) AS dt, taker_address FROM trades WHERE date > ?
+		UNION
+		SELECT date_trunc(?, date) AS dt, taker_address FROM trades WHERE date > ?
 		) AS traders GROUP BY dt ORDER BY dt`, trunc, from, trunc, from).Scan(&resTraders)
 	for i, _ := range res {
 		res[i].TradersCount = resTraders[i].TradersCount
