@@ -49,6 +49,7 @@ func GetTokens(c *gin.Context) {
 			// tokens[i].Trades24hChange = tradesData.Trades24hChange
 			tokens[i].Traders24h = tradesData.Traders24h
 			// tokens[i].Traders24hChange = tradesData.Traders24hChange
+			tokens[i].Amount24h = tradesData.Amount24h
 		}
 
 		type resType struct {

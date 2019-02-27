@@ -27,10 +27,11 @@ type Token struct {
 	Volume1mChange  float32         `gorm:"column:volume_1m_change" json:"volume1mChange"`
 
 	// GORM ignore
-	Trades24h        uint64  `gorm:"-" json:"trades24h"`
-	Trades24hChange  float32 `gorm:"-" json:"trades24hChange"`
-	Traders24h       uint64  `gorm:"-" json:"traders24h"`
-	Traders24hChange float32 `gorm:"-" json:"traders24hChange"`
+	Trades24h        uint64          `gorm:"-" json:"trades24h"`
+	Trades24hChange  float32         `gorm:"-" json:"trades24hChange"`
+	Traders24h       uint64          `gorm:"-" json:"traders24h"`
+	Traders24hChange float32         `gorm:"-" json:"traders24hChange"`
+	Amount24h        decimal.Decimal `gorm:"-" json:"amount24h"`
 }
 
 func (Token) TableName() string {

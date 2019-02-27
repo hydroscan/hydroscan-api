@@ -16,6 +16,7 @@ type TokenTrades24hData struct {
 	Trades24hChange  float32
 	Traders24h       uint64
 	Traders24hChange float32
+	Amount24h        decimal.Decimal
 }
 
 func UpdateTokenVolume24h() {
@@ -141,10 +142,12 @@ func UpdateTokenTrades24h() {
 	time48hAgo := time.Now().Add(-48 * time.Hour)
 
 	type QueryResult struct {
-		Trades24h      uint64
-		Trades24hLast  uint64
-		Traders24h     uint64
-		Traders24hLast uint64
+		Trades24h             uint64
+		Trades24hLast         uint64
+		Traders24h            uint64
+		Traders24hLast        uint64
+		AsBaseTokenAmount24h  decimal.Decimal
+		AsQuoteTokenAmount24h decimal.Decimal
 	}
 
 	for _, token := range tokens {
@@ -172,6 +175,11 @@ func UpdateTokenTrades24h() {
 			time48hAgo, time24hAgo, token.Address, token.Address,
 			time48hAgo, time24hAgo, token.Address, token.Address).Scan(&result)
 
+		models.DB.Raw("SELECT sum(base_token_amount) AS as_base_token_amount24h FROM trades WHERE date > ? AND date <= ? AND base_token_address = ?",
+			time24hAgo, timeNow, token.Address).Scan(&result)
+		models.DB.Raw("SELECT sum(quote_token_amount) AS as_quote_token_amount24h FROM trades WHERE date > ? AND date <= ? AND quote_token_address = ?",
+			time24hAgo, timeNow, token.Address).Scan(&result)
+
 		var trades24hChange float32 = 0
 		if result.Trades24hLast != 0 {
 			trades24hChange = float32((float64(result.Trades24h) - float64(result.Trades24hLast)) / float64(result.Trades24hLast))
@@ -182,7 +190,9 @@ func UpdateTokenTrades24h() {
 			traders24hChange = float32((float64(result.Traders24h) - float64(result.Traders24hLast)) / float64(result.Traders24hLast))
 		}
 
-		data := TokenTrades24hData{result.Trades24h, trades24hChange, result.Traders24hLast, traders24hChange}
+		amount24h := result.AsBaseTokenAmount24h.Add(result.AsQuoteTokenAmount24h)
+
+		data := TokenTrades24hData{result.Trades24h, trades24hChange, result.Traders24hLast, traders24hChange, amount24h}
 		b, err := json.Marshal(data)
 		if err != nil {
 			panic(err)
