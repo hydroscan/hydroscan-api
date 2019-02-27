@@ -1,52 +1,56 @@
 package apiv1
 
 import (
-	"math"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/hydroscan/hydroscan-api/models"
 	"github.com/jinzhu/gorm"
 )
 
-func GetTokens(c *gin.Context) {
-	pageQuery := c.DefaultQuery("page", "1")
-	i, err := strconv.ParseInt(pageQuery, 10, 64)
-	page := int(i)
-	if err != nil {
-		page = 1
-	}
-	pageSize := 25
-	offset := (page - 1) * pageSize
+// // Example select tokens with volume, change just using SQL
+// // this is little complex and maybe slow when data is enough
+// select t.address, t.name, t.symbol, t.decimals, t.price_usd, t.price_updated_at, t.volume, sum(trades.volume_usd) as volume_last
+// from (
+//   select t.address, t.name, t.symbol, t.decimals, t.price_usd, t.price_updated_at, sum(trades.volume_usd) as volume
+//   from tokens as t, trades
+//   where (trades.base_token_address = t.address or trades.quote_token_address = t.address) and trades.date >= '2019-02-25T00:00:00+08:00' and trades.date < '2019-02-26T00:00:00+08:00'
+//   group by t.address, t.name, t.symbol, t.decimals, t.price_usd, t.price_updated_at
+//   order by volume desc limit 25 offset 0
+// ) as t, trades
+// where (t.address = trades.base_token_address or t.address = trades.quote_token_address) and trades.date >= '2019-02-24T00:00:00+08:00' and trades.date < '2019-02-25T00:00:00+08:00'
+// group by t.address, t.name, t.symbol, t.decimals, t.price_usd, t.price_updated_at, t.volume
+// order by t.volume desc;
 
-	var tokens []models.Token
-	if err := models.DB.Offset(offset).Limit(pageSize).Find(&tokens).Error; gorm.IsRecordNotFoundError(err) {
-		c.AbortWithStatus(404)
-	} else {
-		type resType struct {
-			Page      int            `json:"page"`
-			PageSize  int            `json:"pageSize"`
-			TotalPage int            `json:"totalPage"`
-			Count     uint64         `json:"count"`
-			Tokens    []models.Token `json:"tokens"`
-		}
-		res := resType{page, pageSize, 0, 0, tokens}
-		models.DB.Table("tokens").Count(&res.Count)
-		res.TotalPage = int(math.Ceil(float64(res.Count) / float64(pageSize)))
+// const queryTokensColumns = "t.address, t.name, t.symbol, t.decimals, t.price_usd, t.price_updated_at"
+// const queryTokensSQL = `select ` + queryTokensColumns + `, t.volume, sum(trades.volume_usd) as volume_last
+// from (
+//   select ` + queryTokensColumns + `, sum(trades.volume_usd) as volume
+//   from tokens as t, trades
+//   where (trades.base_token_address = t.address or trades.quote_token_address = t.address) and trades.date >= ? and trades.date < ?
+//   group by ` + queryTokensColumns + `
+//   order by volume desc limit ? offset ?
+// ) as t, trades
+// where (t.address = trades.base_token_address or t.address = trades.quote_token_address) and trades.date >= ? and trades.date < ?
+// group by ` + queryTokensColumns + `, t.volume
+// order by t.volume desc`
 
-		c.JSON(200, res)
-	}
+type TokensQuery struct {
+	Page     int    `form:"page"`
+	PageSize int    `form:"pageSize"`
+	Filter   string `form:"filter"`
 }
 
-func GetTokensTop(c *gin.Context) {
-	filter := c.DefaultQuery("filter", "24H")
+func GetTokens(c *gin.Context) {
+	query := TokensQuery{1, 25, "24H"}
+	c.BindQuery(&query)
 
 	order := "volume_24h desc"
-	switch filter {
+	switch query.Filter {
 	case "24H":
 		order = "volume_24h desc"
 	case "7D":
 		order = "volume_7d desc"
+	case "1M":
+		order = "volume_1m desc"
 	case "ALL":
 		order = "volume_all desc"
 	default:
@@ -54,14 +58,24 @@ func GetTokensTop(c *gin.Context) {
 		return
 	}
 
-	pageSize := 10
-	offset := 0
+	page := query.Page
+	pageSize := query.PageSize
+	offset := (page - 1) * pageSize
 
 	var tokens []models.Token
 	if err := models.DB.Offset(offset).Limit(pageSize).Order(order).Find(&tokens).Error; gorm.IsRecordNotFoundError(err) {
 		c.AbortWithStatus(404)
 	} else {
-		c.JSON(200, tokens)
+		type resType struct {
+			Page     int            `json:"page"`
+			PageSize int            `json:"pageSize"`
+			Count    uint64         `json:"count"`
+			Tokens   []models.Token `json:"tokens"`
+		}
+		res := resType{page, pageSize, 0, tokens}
+		models.DB.Table("tokens").Count(&res.Count)
+
+		c.JSON(200, res)
 	}
 }
 

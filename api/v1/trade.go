@@ -1,8 +1,6 @@
 package apiv1
 
 import (
-	"math"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,14 +12,19 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+type TradesQuery struct {
+	Page              int    `form:"page"`
+	PageSize          int    `form:"pageSize"`
+	BaseTokenAddress  string `form:"baseTokenAddress"`
+	QuoteTokenAddress string `form:"quoteTokenAddress"`
+}
+
 func GetTrades(c *gin.Context) {
-	pageQuery := c.DefaultQuery("page", "1")
-	i, err := strconv.ParseInt(pageQuery, 10, 64)
-	page := int(i)
-	if err != nil {
-		page = 1
-	}
-	pageSize := 25
+	query := TradesQuery{1, 25, "", ""}
+	c.BindQuery(&query)
+
+	page := query.Page
+	pageSize := query.PageSize
 	offset := (page - 1) * pageSize
 
 	var trades []models.Trade
@@ -29,28 +32,15 @@ func GetTrades(c *gin.Context) {
 		c.AbortWithStatus(404)
 	} else {
 		type resType struct {
-			Page      int            `json:"page"`
-			PageSize  int            `json:"pageSize"`
-			TotalPage int            `json:"totalPage"`
-			Count     uint64         `json:"count"`
-			Trades    []models.Trade `json:"trades"`
+			Page     int            `json:"page"`
+			PageSize int            `json:"pageSize"`
+			Count    uint64         `json:"count"`
+			Trades   []models.Trade `json:"trades"`
 		}
-		res := resType{page, pageSize, 0, 0, trades}
+		res := resType{page, pageSize, 0, trades}
 		models.DB.Table("trades").Count(&res.Count)
-		res.TotalPage = int(math.Ceil(float64(res.Count) / float64(pageSize)))
 
 		c.JSON(200, res)
-	}
-}
-
-func GetTradesLatest(c *gin.Context) {
-	pageSize := 8
-	offset := 0
-	var trades []models.Trade
-	if err := models.DB.Order("block_number desc").Order("log_index desc").Offset(offset).Limit(pageSize).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").Find(&trades).Error; gorm.IsRecordNotFoundError(err) {
-		c.AbortWithStatus(404)
-	} else {
-		c.JSON(200, trades)
 	}
 }
 
@@ -67,9 +57,10 @@ func GetTrade(c *gin.Context) {
 func GetTradesChart(c *gin.Context) {
 	filter := c.DefaultQuery("filter", "1M")
 	var res []struct {
-		Dt    time.Time       `json:"date"`
-		Sum   decimal.Decimal `json:"volume"`
-		Count int             `json:"trades"`
+		Dt           time.Time       `json:"date"`
+		Sum          decimal.Decimal `json:"volume"`
+		TradesCount  uint64          `json:"trades"`
+		TradersCount uint64          `json:"traders"`
 	}
 	trunc := "day"
 	from := time.Now().Add(-30 * 24 * time.Hour)
@@ -93,7 +84,23 @@ func GetTradesChart(c *gin.Context) {
 		c.AbortWithStatus(404)
 		return
 	}
-	models.DB.Raw("select date_trunc(?, date) as dt, sum(volume_usd), count(1) from trades where date >= ? group by dt order by dt", trunc, from).Scan(&res)
+	models.DB.Raw(`select date_trunc(?, date) as dt, sum(volume_usd), count(*) as trades_count
+		from trades where date >= ? group by dt order by dt`, trunc, from).Scan(&res)
+	// select dt, count(*) from ( select date_trunc('hour', date) as dt, maker_address from trades where date > '2019-02-26t00:00:00+08:00' union select date_trunc('hour', date) as dt, taker_address from trades where date > '2019-02-26t00:00:00+08:00' ) as traders group by dt order by dt;
+	// select traders
+
+	var resTraders []struct {
+		TradersCount uint64 `json:"traders"`
+	}
+	models.DB.Raw(`select dt, count(*) as traders_count from (
+		select date_trunc(?, date) as dt, maker_address from trades WHERE date > ?
+		union
+		select date_trunc(?, date) as dt, taker_address from trades WHERE date > ?
+		) as traders group by dt order by dt`, trunc, from, trunc, from).Scan(&resTraders)
+
+	for i, _ := range res {
+		res[i].TradersCount = resTraders[i].TradersCount
+	}
 	c.JSON(200, res)
 }
 

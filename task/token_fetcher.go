@@ -25,6 +25,8 @@ type TokenInfo struct {
 	Symbol            string `json:"symbol"`
 	Decimals          string
 	DecimalsInterface interface{} `json:"decimals"` // ethplorer api return decimals type can be string or number
+	TotalSupply       string      `json:"totalSupply"`
+	HoldersCount      uint64      `json:"holdersCount"`
 	Price             TokenPrice  `json:"price"`
 }
 
@@ -40,9 +42,11 @@ func GetToken(address string) models.Token {
 
 		mToken = models.Token{
 			Address:        address,
+			Decimals:       uint(decimals),
 			Name:           tokenInfo.Name,
 			Symbol:         tokenInfo.Symbol,
-			Decimals:       uint(decimals),
+			TotalSupply:    tokenInfo.TotalSupply,
+			HoldersCount:   tokenInfo.HoldersCount,
 			PriceUSD:       tokenInfo.Price.Rate,
 			PriceUpdatedAt: time.Unix(tokenInfo.Price.TS, 0),
 		}
@@ -60,6 +64,10 @@ func UpdateTokenPrices() {
 	for _, mToken := range mTokens {
 		tokenInfo := GetTokenInfo(mToken.Address)
 		models.DB.Model(&mToken).Updates(models.Token{
+			Name:           tokenInfo.Name,
+			Symbol:         tokenInfo.Symbol,
+			TotalSupply:    tokenInfo.TotalSupply,
+			HoldersCount:   tokenInfo.HoldersCount,
 			PriceUSD:       tokenInfo.Price.Rate,
 			PriceUpdatedAt: time.Unix(tokenInfo.Price.TS, 0),
 		})
