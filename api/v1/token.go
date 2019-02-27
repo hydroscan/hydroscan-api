@@ -3,11 +3,13 @@ package apiv1
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/hydroscan/hydroscan-api/models"
+	"github.com/hydroscan/hydroscan-api/task"
 	"github.com/jinzhu/gorm"
 )
 
-// // Example select tokens with volume, change just using SQL
-// // this is little complex and maybe slow when data is enough
+// // Example select tokens with volume, change only using SQL instead of cache
+// // this is little complex and may be slow when data is enough
+
 // select t.address, t.name, t.symbol, t.decimals, t.price_usd, t.price_updated_at, t.volume, sum(trades.volume_usd) as volume_last
 // from (
 //   select t.address, t.name, t.symbol, t.decimals, t.price_usd, t.price_updated_at, sum(trades.volume_usd) as volume
@@ -66,6 +68,14 @@ func GetTokens(c *gin.Context) {
 	if err := models.DB.Offset(offset).Limit(pageSize).Order(order).Find(&tokens).Error; gorm.IsRecordNotFoundError(err) {
 		c.AbortWithStatus(404)
 	} else {
+		for i, _ := range tokens {
+			tradesData := task.GetTrades24hData(tokens[i].Address)
+			// tokens[i].Trades24h = tradesData.Trades24h
+			// tokens[i].Trades24hChange = tradesData.Trades24hChange
+			tokens[i].Traders24h = tradesData.Traders24h
+			// tokens[i].Traders24hChange = tradesData.Traders24hChange
+		}
+
 		type resType struct {
 			Page     int            `json:"page"`
 			PageSize int            `json:"pageSize"`

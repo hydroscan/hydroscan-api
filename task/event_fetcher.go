@@ -86,7 +86,9 @@ func saveEventLog(eventLog types.Log) {
 
 	mTrade := models.Trade{}
 
-	if err := models.DB.Where("block_number = ? and log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
+	if err := models.DB.Where("block_number = ? AND log_index = ?",
+		eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
+
 		match := MatchEvent{}
 		err = contractABI.Unpack(&match, "Match", eventLog.Data)
 		if err != nil {
@@ -128,7 +130,7 @@ func saveEventLog(eventLog types.Log) {
 			TakerGasFee:        decimal.NewFromBigInt(match.TakerGasFee, int32(-quoteToken.Decimals)),
 		}
 
-		if err = models.DB.Where("block_number = ? and log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
+		if err = models.DB.Where("block_number = ? AND log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
 			models.DB.Create(&mTrade)
 		}
 	}

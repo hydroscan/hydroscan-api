@@ -84,20 +84,19 @@ func GetTradesChart(c *gin.Context) {
 		c.AbortWithStatus(404)
 		return
 	}
-	models.DB.Raw(`select date_trunc(?, date) as dt, sum(volume_usd), count(*) as trades_count
-		from trades where date >= ? group by dt order by dt`, trunc, from).Scan(&res)
-	// select dt, count(*) from ( select date_trunc('hour', date) as dt, maker_address from trades where date > '2019-02-26t00:00:00+08:00' union select date_trunc('hour', date) as dt, taker_address from trades where date > '2019-02-26t00:00:00+08:00' ) as traders group by dt order by dt;
-	// select traders
-
+	models.DB.Raw(`SELECT date_trunc(?, date) AS dt, sum(volume_usd), count(*) AS trades_count
+		FROM trades WHERE date >= ? GROUP BY dt ORDER BY dt`, trunc, from).Scan(&res)
 	var resTraders []struct {
 		TradersCount uint64 `json:"traders"`
 	}
-	models.DB.Raw(`select dt, count(*) as traders_count from (
-		select date_trunc(?, date) as dt, maker_address from trades WHERE date > ?
-		union
-		select date_trunc(?, date) as dt, taker_address from trades WHERE date > ?
-		) as traders group by dt order by dt`, trunc, from, trunc, from).Scan(&resTraders)
 
+	// select traders
+	// SELECT dt, count(*) FROM (SELECT date_trunc('hour', date) AS dt, maker_address FROM trades WHERE date > '2019-02-26t00:00:00+08:00'UNION SELECT date_trunc('hour', date) AS dt, taker_address FROM trades WHERE date > '2019-02-26t00:00:00+08:00' ) AS traders GROUP BY dt ORDER BY dt;
+	models.DB.Raw(`SELECT dt, count(*) AS traders_count
+		FROM (
+		SELECT date_trunc(?, date) AS dt, maker_address FROM trades WHERE date > ?
+		UNION SELECT date_trunc(?, date) AS dt, taker_address FROM trades WHERE date > ?
+		) AS traders GROUP BY dt ORDER BY dt`, trunc, from, trunc, from).Scan(&resTraders)
 	for i, _ := range res {
 		res[i].TradersCount = resTraders[i].TradersCount
 	}

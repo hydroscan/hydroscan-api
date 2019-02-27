@@ -30,7 +30,7 @@ func UpdateHistoryTradePrice() {
 	for address, slug := range coinmarketcapSlugs {
 		missingTime := MissingTime{}
 		log.Info(address)
-		models.DB.Raw("select min(date), max(date) from trades where quote_token_price_usd = 0 and quote_token_address = ?", address).Scan(&missingTime)
+		models.DB.Raw("SELECT min(date), max(date) FROM trades WHERE quote_token_price_usd = 0 AND quote_token_address = ?", address).Scan(&missingTime)
 		if missingTime.Min.IsZero() { // no missing price
 			continue
 		}
@@ -70,7 +70,7 @@ func fetchHistoryIntervalAndSave(address string, slug string, from int64, to int
 		timeFloat64, _ := timePrice[0].Float64()
 		nextTime := time.Unix(int64(timeFloat64/1000), 0)
 		trades := []models.Trade{}
-		models.DB.Where("quote_token_price_usd = 0 and quote_token_address = ? and date >= ? and date <= ?", address, lastTime, nextTime).Find(&trades)
+		models.DB.Where("quote_token_price_usd = 0 AND quote_token_address = ? AND date >= ? AND date <= ?", address, lastTime, nextTime).Find(&trades)
 		for _, trade := range trades {
 			models.DB.Model(&trade).Updates(models.Trade{QuoteTokenPriceUSD: timePrice[1], VolumeUSD: timePrice[1].Mul(trade.QuoteTokenAmount)})
 		}
@@ -79,7 +79,7 @@ func fetchHistoryIntervalAndSave(address string, slug string, from int64, to int
 }
 
 func UpdateOnlyVolumeUSD() {
-	models.DB.Exec("UPDATE trades SET volume_usd = quote_token_price_usd * quote_token_amount WHERE volume_usd = 0 and quote_token_price_usd != 0")
+	models.DB.Exec("UPDATE trades SET volume_usd = quote_token_price_usd * quote_token_amount WHERE volume_usd = 0 AND quote_token_price_usd != 0")
 	log.Info("UpdateOnlyVolumeUSD")
 }
 

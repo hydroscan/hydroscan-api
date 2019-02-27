@@ -23,11 +23,11 @@ func UpdateIndicators() {
 	time24hAgo := time.Now().Add(-24 * time.Hour)
 	indicators := Indicators{}
 
-	models.DB.Raw("SELECT sum(volume_usd) AS volume24h FROM trades where date > ?", time24hAgo).Scan(&indicators)
-	models.DB.Raw("SELECT count(*) AS trades24h FROM trades where date > ?", time24hAgo).Scan(&indicators)
-	models.DB.Raw("SELECT count(*) AS traders24h FROM ( SELECT maker_address FROM trades WHERE date > ? UNION Select taker_address FROM trades WHERE date > ? ) AS traders",
+	models.DB.Raw("SELECT sum(volume_usd) AS volume24h FROM trades WHERE date > ?", time24hAgo).Scan(&indicators)
+	models.DB.Raw("SELECT count(*) AS trades24h FROM trades WHERE date > ?", time24hAgo).Scan(&indicators)
+	models.DB.Raw("SELECT count(*) AS traders24h FROM (SELECT maker_address FROM trades WHERE date > ? UNION SELECT taker_address FROM trades WHERE date > ? ) AS traders",
 		time24hAgo, time24hAgo).Scan(&indicators)
-	models.DB.Raw("SELECT sum(maker_rebate) AS market_rabate24h FROM trades where date > ?", time24hAgo).Scan(&indicators)
+	models.DB.Raw("SELECT sum(maker_rebate) AS market_rabate24h FROM trades WHERE date > ?", time24hAgo).Scan(&indicators)
 	log.Info(indicators)
 	b, err := json.Marshal(indicators)
 	if err != nil {
