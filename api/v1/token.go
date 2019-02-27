@@ -99,6 +99,13 @@ func GetToken(c *gin.Context) {
 	if err := models.DB.Where("address = ?", address).First(&token).Error; gorm.IsRecordNotFoundError(err) {
 		c.AbortWithStatus(404)
 	} else {
+		tradesData := task.GetTrades24hData(token.Address)
+		token.Trades24h = tradesData.Trades24h
+		token.Trades24hChange = tradesData.Trades24hChange
+		token.Traders24h = tradesData.Traders24h
+		token.Traders24hChange = tradesData.Traders24hChange
+		token.Amount24h = tradesData.Amount24h
+
 		c.JSON(200, token)
 	}
 }
