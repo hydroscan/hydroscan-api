@@ -44,7 +44,7 @@ func UpdateRelayers() {
 }
 
 func getRelayers() []RelayerInfo {
-	jsonFile, err := os.Open("resource/relayers.json")
+	jsonFile, err := os.Open("/resource/relayers.json")
 	if err != nil {
 		panic(err)
 	}

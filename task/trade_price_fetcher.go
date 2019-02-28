@@ -84,7 +84,7 @@ func UpdateOnlyVolumeUSD() {
 }
 
 func getCoinmarketcapSlugs() {
-	jsonFile, err := os.Open("resource/coinmarketcap_slugs.json")
+	jsonFile, err := os.Open("/resource/coinmarketcap_slugs.json")
 	if err != nil {
 		panic(err)
 	}
