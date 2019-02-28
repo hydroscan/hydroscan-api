@@ -1,12 +1,12 @@
 package task
 
 import (
-	"os"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/ethclient"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 const HydroExchangeAddress = "0x2cB4B49C0d6E9db2164d94Ce48853BF77C4D883E"
@@ -18,7 +18,7 @@ var contractABI abi.ABI
 var err error
 
 func InitEthClient() {
-	EthClient, err = ethclient.Dial(os.Getenv("WEB3_URL"))
+	EthClient, err = ethclient.Dial(viper.GetString("web3_url"))
 	if err != nil {
 		log.Panic(err)
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/hydroscan/hydroscan-api/config"
 	"github.com/hydroscan/hydroscan-api/models"
 	"github.com/hydroscan/hydroscan-api/redis"
 	"github.com/hydroscan/hydroscan-api/task"
@@ -20,6 +21,8 @@ func subscribeRetryWrapper() {
 }
 
 func main() {
+	config.Load()
+
 	models.Connect()
 	defer models.Close()
 	redis.Connect()

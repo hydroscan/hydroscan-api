@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 type TokenPrice struct {
@@ -75,7 +75,7 @@ func UpdateTokenPrices() {
 }
 
 func GetTokenInfo(address string) TokenInfo {
-	url := "http://api.ethplorer.io/getTokenInfo/" + address + "?apiKey=" + os.Getenv("ETHPLORER_APIKEY")
+	url := "http://api.ethplorer.io/getTokenInfo/" + address + "?apiKey=" + viper.GetString("ethplorer_apikey")
 	resp, err := http.Get(url)
 	if err != nil {
 		panic(err)

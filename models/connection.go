@@ -1,19 +1,18 @@
 package models
 
 import (
-	"os"
-
 	log "github.com/sirupsen/logrus"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/spf13/viper"
 )
 
 var DB *gorm.DB
 var err error
 
 func Connect() {
-	DB, err = gorm.Open("postgres", os.Getenv("POSTGRES_URL"))
+	DB, err = gorm.Open("postgres", viper.GetString("postgres_url"))
 	if err != nil {
 		log.Fatal(err)
 	}

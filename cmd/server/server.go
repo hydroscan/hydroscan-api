@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/hydroscan/hydroscan-api/api"
+	"github.com/hydroscan/hydroscan-api/config"
 	"github.com/hydroscan/hydroscan-api/middleware"
 	"github.com/hydroscan/hydroscan-api/models"
 	"github.com/hydroscan/hydroscan-api/redis"
@@ -11,6 +12,8 @@ import (
 )
 
 func main() {
+	config.Load()
+
 	models.Connect()
 	defer models.Close()
 	redis.Connect()

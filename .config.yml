@@ -1,0 +1,5 @@
+postgres_url: postgres://wanglei:wanglei@localhost:5432/hydroscan?sslmode=disable
+redis_url: redis://127.0.0.1:6379/0
+web3_url: https://mainnet.infura.io
+web3_ws: wss://mainnet.infura.io/ws
+ethplorer_apikey: kmme6070Vqjm40

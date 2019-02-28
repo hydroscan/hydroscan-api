@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/hydroscan/hydroscan-api/config"
 	"github.com/hydroscan/hydroscan-api/models"
 	"github.com/hydroscan/hydroscan-api/redis"
 	"github.com/hydroscan/hydroscan-api/task"
@@ -24,6 +25,8 @@ func safeTask(fn taskType) taskType {
 }
 
 func main() {
+	config.Load()
+
 	models.Connect()
 	defer models.Close()
 	redis.Connect()

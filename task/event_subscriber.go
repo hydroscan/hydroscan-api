@@ -2,13 +2,14 @@ package task
 
 import (
 	"context"
+
 	log "github.com/sirupsen/logrus"
-	"os"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/spf13/viper"
 )
 
 const MaxReties = 3
@@ -21,7 +22,7 @@ func SubscribeLogs() {
 	dialRetries := MaxReties
 
 	for dialRetries == MaxReties || (err != nil && dialRetries > 0) {
-		client, err = ethclient.Dial(os.Getenv("WEB3_WS"))
+		client, err = ethclient.Dial(viper.GetString("web3_url"))
 		dialRetries -= 1
 	}
 	if err != nil {
@@ -46,7 +47,7 @@ func SubscribeLogs() {
 
 			dialRetries = MaxReties
 			for err != nil && dialRetries > 0 {
-				client, err = ethclient.Dial(os.Getenv("WEB3_WS"))
+				client, err = ethclient.Dial(viper.GetString("web3_ws"))
 				dialRetries -= 1
 			}
 			if err != nil {
