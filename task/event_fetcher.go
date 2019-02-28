@@ -76,7 +76,7 @@ func fetchLogs(fromBlock int64, toBlock int64) {
 }
 
 func saveEventLog(eventLog types.Log) {
-	log.Info("saveEventLog", eventLog.BlockNumber, eventLog.Index)
+	log.Info("saveEventLog: ", eventLog.BlockNumber, eventLog.Index)
 	if eventLog.Removed {
 		log.Info("event log Removed ")
 		return
