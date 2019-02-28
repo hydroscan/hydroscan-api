@@ -8,16 +8,9 @@ import (
 	"strings"
 )
 
-// pod name is something like "hydroscan-6bff5fc87d-l864j"
-// this method will remove the tailing hash, then return "hydroscan"
-func getPodName() string {
-	parts := strings.Split(viper.GetString("pod.name"), "-")
-	return strings.Join(parts[:len(parts)-2], "-")
-}
-
 func Load() {
 	// All capitalized ENVs with prefix 'HYDROSCAN' will have the most priority.
-	viper.SetEnvPrefix("HYDROSCAN")
+	// viper.SetEnvPrefix("HYDROSCAN")
 	viper.AutomaticEnv()
 	replacer := strings.NewReplacer(".", "_")
 	viper.SetEnvKeyReplacer(replacer)
@@ -35,7 +28,7 @@ func Load() {
 	if viper.GetString("etcd_url") != "" {
 		etcd_url := viper.GetString("etcd_url")
 
-		etcd_config_file := fmt.Sprintf("/k8s-app-configs/%s/%s", viper.GetString("pod.namespace"), getPodName())
+		etcd_config_file := fmt.Sprintf("/k8s-app-configs/%s/hydroscan", viper.GetString("namespace"))
 
 		log.Printf("Loading Coinfigs from etcd: %s, %s", etcd_url, etcd_config_file)
 
