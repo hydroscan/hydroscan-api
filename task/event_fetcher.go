@@ -58,7 +58,7 @@ func FetchHistoricalLogs() {
 func fetchLogs(fromBlock int64, toBlock int64) {
 	log.Info("fetchLogs: ", fromBlock, " - ", toBlock)
 
-	contractAddress := common.HexToAddress(os.Getenv("HYDRO_EXCHANGE_ADDRESS"))
+	contractAddress := common.HexToAddress(HydroExchangeAddress)
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(fromBlock),
 		ToBlock:   big.NewInt(toBlock),
@@ -140,11 +140,7 @@ func getFromBlockNumber() uint64 {
 	var number uint64
 	mTrade := models.Trade{}
 	if err := models.DB.Order("block_number desc").Take(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
-		i, err := strconv.ParseInt(os.Getenv("HYDRO_START_BLOCK_NUMBER"), 10, 64)
-		if err != nil {
-			panic(err)
-		}
-		number = uint64(i)
+		number = uint64(HydroStartBlockNumber)
 	} else {
 		number = mTrade.BlockNumber
 	}

@@ -1,8 +1,7 @@
-GIN_MODE: release
-PORT: 8080
-POSTGRES_URL: postgres://YourUserName:YourPassword@YourHost:5432/YourDatabase?sslmode=disable
-REDIS_URL: redis://127.0.0.1:6379/0
-HYDRO_EXCHANGE_ADDRESS: 0x2cB4B49C0d6E9db2164d94Ce48853BF77C4D883E
-WEB3_URL: https://mainnet.infura.io
-WEB3_WS: wss://mainnet.infura.io/ws
-ETHPLORER_APIKEY: freekey
+gin_mode: release
+port: 8080
+postgres_url: postgres://YourUserName:YourPassword@YourHost:5432/YourDatabase?sslmode=disable
+redis_url: redis://127.0.0.1:6379/0
+web3_url: https://mainnet.infura.io
+web3_ws: wss://mainnet.infura.io/ws
+ethplorer_apikey: freekey

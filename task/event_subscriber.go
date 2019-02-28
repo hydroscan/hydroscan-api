@@ -28,7 +28,7 @@ func SubscribeLogs() {
 		panic(err)
 	}
 
-	contractAddress := common.HexToAddress(os.Getenv("HYDRO_EXCHANGE_ADDRESS"))
+	contractAddress := common.HexToAddress(HydroExchangeAddress)
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{contractAddress},
 	}
