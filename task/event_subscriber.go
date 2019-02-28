@@ -22,7 +22,7 @@ func SubscribeLogs() {
 	dialRetries := MaxReties
 
 	for dialRetries == MaxReties || (err != nil && dialRetries > 0) {
-		client, err = ethclient.Dial(viper.GetString("web3_url"))
+		client, err = ethclient.Dial(viper.GetString("web3_ws"))
 		dialRetries -= 1
 	}
 	if err != nil {
