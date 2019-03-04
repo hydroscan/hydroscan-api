@@ -29,13 +29,13 @@ func GetTrades(c *gin.Context) {
 	offset := (page - 1) * pageSize
 
 	var trades []models.Trade
-	statment := models.DB.Order("block_number desc").Order("log_index desc").Offset(offset).Limit(pageSize)
+	statment := models.DB.Table("trades").Order("block_number desc").Order("log_index desc")
 	if query.BaseTokenAddress != "" && query.QuoteTokenAddress != "" {
 		statment = statment.Where("base_token_address = ? AND quote_token_address = ?", query.BaseTokenAddress, query.QuoteTokenAddress)
 	} else if query.TokenAddress != "" {
 		statment = statment.Where("base_token_address = ? OR quote_token_address = ?", query.TokenAddress, query.TokenAddress)
 	}
-	if err := statment.Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").Find(&trades).Error; gorm.IsRecordNotFoundError(err) {
+	if err := statment.Offset(offset).Limit(pageSize).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").Find(&trades).Error; gorm.IsRecordNotFoundError(err) {
 		c.AbortWithStatus(404)
 	} else {
 		type resType struct {
@@ -45,7 +45,7 @@ func GetTrades(c *gin.Context) {
 			Trades   []models.Trade `json:"trades"`
 		}
 		res := resType{page, pageSize, 0, trades}
-		models.DB.Table("trades").Count(&res.Count)
+		statment.Count(&res.Count)
 
 		c.JSON(200, res)
 	}
