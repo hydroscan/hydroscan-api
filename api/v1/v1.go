@@ -16,6 +16,7 @@ func ApplyRoutes(r *gin.RouterGroup) {
 
 		v1.GET("/trades", GetTrades)
 		v1.GET("/trades/:uuid", GetTrade)
+		v1.GET("/trades_search", GetTradesSearch)
 		v1.GET("/trades_chart", GetTradesChart)
 		v1.GET("/trades_indicators", GetTradesIndicators)
 	}

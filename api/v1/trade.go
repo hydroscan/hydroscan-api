@@ -8,6 +8,7 @@ import (
 	"github.com/hydroscan/hydroscan-api/models"
 	"github.com/hydroscan/hydroscan-api/redis"
 	"github.com/hydroscan/hydroscan-api/task"
+	"github.com/hydroscan/hydroscan-api/utils"
 	"github.com/jinzhu/gorm"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
@@ -183,4 +184,47 @@ func GetTradesIndicators(c *gin.Context) {
 	indicators := task.Indicators{}
 	json.Unmarshal([]byte(res), &indicators)
 	c.JSON(200, indicators)
+}
+
+func GetTradesSearch(c *gin.Context) {
+	keyword := c.Query("keyword")
+
+	var res struct {
+		SearchType string `json:"searchType"`
+		SearchKey  string `json:"searchKey"`
+	}
+
+	if utils.IsAddress(keyword) {
+		log.Info(("isAddress"))
+		if isTrue, searchKey := utils.IsToken(keyword); isTrue {
+			log.Info(("IsToken"))
+
+			res.SearchType = "TOKEN"
+			res.SearchKey = searchKey
+
+		} else if isTrue, searchKey := utils.IsRelayer(keyword); isTrue {
+			res.SearchType = "RELAYER"
+			res.SearchKey = searchKey
+
+		} else if isTrue, searchKey := utils.IsTrader(keyword); isTrue {
+			res.SearchType = "TRADER"
+			res.SearchKey = searchKey
+
+		}
+	} else if utils.IsTransaction(keyword) {
+		res.SearchType = "TRANSACTION"
+		res.SearchKey = keyword
+
+	} else {
+		if isTrue, searchKey := utils.IsTokenSymbol(keyword); isTrue {
+			res.SearchType = "TOKEN"
+			res.SearchKey = searchKey
+
+		} else if isTrue, searchKey := utils.IsTokenName(keyword); isTrue {
+			res.SearchType = "TOKEN"
+			res.SearchKey = searchKey
+		}
+	}
+
+	c.JSON(200, res)
 }
