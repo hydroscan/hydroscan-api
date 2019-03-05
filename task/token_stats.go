@@ -192,7 +192,7 @@ func UpdateTokenTrades24h() {
 
 		amount24h := result.AsBaseTokenAmount24h.Add(result.AsQuoteTokenAmount24h)
 
-		data := TokenTrades24hData{result.Trades24h, trades24hChange, result.Traders24hLast, traders24hChange, amount24h}
+		data := TokenTrades24hData{result.Trades24h, trades24hChange, result.Traders24h, traders24hChange, amount24h}
 		b, err := json.Marshal(data)
 		if err != nil {
 			panic(err)
