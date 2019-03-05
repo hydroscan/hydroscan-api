@@ -292,17 +292,44 @@ func GetTradesSearch(c *gin.Context) {
 
 		}
 	} else if utils.IsTransaction(keyword) {
-		res.SearchType = "TRANSACTION"
-		res.SearchKey = keyword
+		trades := []models.Trade{}
+
+		if err := models.DB.Where("transaction_hash ILIKE ?", "%"+keyword+"%").Order("id desc").Find(&trades).Error; err == nil {
+			res := struct {
+				SearchType   string         `json:"searchType"`
+				SearchKey    string         `json:"searchKey"`
+				SearchResult []models.Trade `json:"searchResult"`
+			}{}
+			res.SearchType = "TRADES"
+			res.SearchKey = keyword
+			res.SearchResult = trades
+			c.JSON(200, res)
+			return
+		}
 
 	} else {
-		if isTrue, searchKey := utils.IsTokenSymbol(keyword); isTrue {
-			res.SearchType = "TOKEN"
-			res.SearchKey = searchKey
+		tokens := []models.Token{}
 
-		} else if isTrue, searchKey := utils.IsTokenName(keyword); isTrue {
-			res.SearchType = "TOKEN"
-			res.SearchKey = searchKey
+		if err := models.DB.Where("name ILIKE ? or symbol ILIKE ?", "%"+keyword+"%", "%"+keyword+"%").Order("volume_24h desc").Find(&tokens).Error; err == nil {
+			res := struct {
+				SearchType   string         `json:"searchType"`
+				SearchKey    string         `json:"searchKey"`
+				SearchResult []models.Token `json:"searchResult"`
+			}{}
+			for i, _ := range tokens {
+				tradesData := task.GetTrades24hData(tokens[i].Address)
+				tokens[i].Trades24h = tradesData.Trades24h
+				tokens[i].Trades24hChange = tradesData.Trades24hChange
+				tokens[i].Traders24h = tradesData.Traders24h
+				tokens[i].Traders24hChange = tradesData.Traders24hChange
+				tokens[i].Amount24h = tradesData.Amount24h
+			}
+
+			res.SearchType = "TOKENS"
+			res.SearchKey = keyword
+			res.SearchResult = tokens
+			c.JSON(200, res)
+			return
 		}
 	}
 

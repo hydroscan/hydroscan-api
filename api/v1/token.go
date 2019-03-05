@@ -42,10 +42,10 @@ func GetTokens(c *gin.Context) {
 	} else {
 		for i, _ := range tokens {
 			tradesData := task.GetTrades24hData(tokens[i].Address)
-			// tokens[i].Trades24h = tradesData.Trades24h
-			// tokens[i].Trades24hChange = tradesData.Trades24hChange
+			tokens[i].Trades24h = tradesData.Trades24h
+			tokens[i].Trades24hChange = tradesData.Trades24hChange
 			tokens[i].Traders24h = tradesData.Traders24h
-			// tokens[i].Traders24hChange = tradesData.Traders24hChange
+			tokens[i].Traders24hChange = tradesData.Traders24hChange
 			tokens[i].Amount24h = tradesData.Amount24h
 		}
 
