@@ -46,7 +46,10 @@ func GetRelayer(c *gin.Context) {
 		}
 
 		var res struct {
-			Relayer          models.Relayer  `json:"relayer"`
+			Name             string          `json:"name"`
+			Url              string          `json:"url"`
+			Slug             string          `json:"slug"`
+			Address          string          `json:"address"`
 			Volume24h        decimal.Decimal `json:"volume24h"`
 			Volume24hLast    decimal.Decimal `json:"volume24hLast"`
 			Volume24hChange  float32         `json:"volume24hChange"`
@@ -134,7 +137,11 @@ func GetRelayer(c *gin.Context) {
 			res.Traders24hChange = float32(changeFloat64)
 		}
 
-		res.Relayer = relayer
+		res.Name = relayer.Name
+		res.Url = relayer.Url
+		res.Slug = relayer.Slug
+		res.Address = relayer.Address
+
 		c.JSON(200, res)
 	}
 }
