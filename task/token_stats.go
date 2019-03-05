@@ -206,11 +206,11 @@ func UpdateTokenTrades24h() {
 }
 
 func GetTrades24hData(address string) TokenTrades24hData {
+	data := TokenTrades24hData{}
 	res, err := redis.Client.HGet("TOKENS_TRADES_24H_DATA", address).Result()
 	if err != nil {
-		panic(err)
+		return data
 	}
-	data := TokenTrades24hData{}
 	json.Unmarshal([]byte(res), &data)
 
 	return data
