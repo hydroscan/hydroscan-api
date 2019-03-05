@@ -72,8 +72,8 @@ func GetTokens(c *gin.Context) {
 //   where (trades.base_token_address = t.address or trades.quote_token_address = t.address) and trades.date >= '2019-02-25T00:00:00+08:00' and trades.date < '2019-02-26T00:00:00+08:00'
 //   group by t.address, t.name, t.symbol, t.decimals, t.price_usd, t.price_updated_at
 //   order by volume desc limit 25 offset 0
-// ) as t, trades
-// where (t.address = trades.base_token_address or t.address = trades.quote_token_address) and trades.date >= '2019-02-24T00:00:00+08:00' and trades.date < '2019-02-25T00:00:00+08:00'
+// ) as t LEFT JOIN trades
+// ON (t.address = trades.base_token_address or t.address = trades.quote_token_address) and trades.date >= '2019-02-24T00:00:00+08:00' and trades.date < '2019-02-25T00:00:00+08:00'
 // group by t.address, t.name, t.symbol, t.decimals, t.price_usd, t.price_updated_at, t.volume
 // order by t.volume desc;
 
@@ -85,8 +85,8 @@ func GetTokens(c *gin.Context) {
 //   where (trades.base_token_address = t.address or trades.quote_token_address = t.address) and trades.date >= ? and trades.date < ?
 //   group by ` + queryTokensColumns + `
 //   order by volume desc limit ? offset ?
-// ) as t, trades
-// where (t.address = trades.base_token_address or t.address = trades.quote_token_address) and trades.date >= ? and trades.date < ?
+// ) as t LEFT JOIN trades
+// ON (t.address = trades.base_token_address or t.address = trades.quote_token_address) and trades.date >= ? and trades.date < ?
 // group by ` + queryTokensColumns + `, t.volume
 // order by t.volume desc`
 

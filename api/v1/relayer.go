@@ -104,8 +104,8 @@ func GetRelayer(c *gin.Context) {
 			AND trades.date >= ? AND trades.date < ?
 			GROUP BY t.address, t.name, t.symbol
 			ORDER BY volume DESC LIMIT 3 OFFSET 0
-		) AS t, trades
-		WHERE (t.address = trades.base_token_address OR t.address = trades.quote_token_address)
+		) AS t LEFT JOIN trades
+		ON (t.address = trades.base_token_address OR t.address = trades.quote_token_address)
 		AND relayer_address = ?
 		AND trades.date >= ? AND trades.date < ?
 		GROUP BY t.address, t.name, t.symbol, t.volume
