@@ -77,6 +77,84 @@ func GetTrade(c *gin.Context) {
 	}
 }
 
+func GetTrader(c *gin.Context) {
+	address := c.Params.ByName("address")
+	type TopToken struct {
+		Address      string          `json:"address"`
+		Name         string          `json:"name"`
+		Symbol       string          `json:"symbol"`
+		Volume       decimal.Decimal `json:"volume"`
+		VolumeLast   decimal.Decimal `json:"volumeLast"`
+		VolumeChange float32         `json:"volumeChange"`
+	}
+
+	var res struct {
+		Volume24h        decimal.Decimal `json:"volume24h"`
+		Volume24hLast    decimal.Decimal `json:"volume24hLast"`
+		Volume24hChange  float32         `json:"volume24hChange"`
+		Trades24h        decimal.Decimal `json:"trades24h"`
+		Trades24hLast    decimal.Decimal `json:"trades24hLast"`
+		Trades24hChange  float32         `json:"trades24hChange"`
+		TotalMakerRabate decimal.Decimal `json:"totalMakerRabate"`
+		TopTokens        []TopToken      `json:"topTokens"`
+	}
+
+	timeNow := time.Now()
+	time24hAgo := time.Now().Add(-24 * time.Hour)
+	time48hAgo := time.Now().Add(-48 * time.Hour)
+
+	models.DB.Raw(`SELECT sum(trades.volume_usd) AS volume24h, count(*) AS trades24h
+		FROM trades WHERE (trades.maker_address = ? OR trades.taker_address = ?) AND date >= ? AND date < ?`,
+		address, address, time24hAgo, timeNow).Scan(&res)
+
+	models.DB.Raw(`SELECT sum(trades.volume_usd) AS volume24h_last, count(*) AS trades24h_last
+		FROM trades WHERE (trades.maker_address = ? OR trades.taker_address = ?) AND date >= ? AND date < ?`,
+		address, address, time48hAgo, time24hAgo).Scan(&res)
+
+	models.DB.Raw(`SELECT sum(maker_rebate) FROM trades WHERE (trades.maker_address = ? OR trades.taker_address = ?)`,
+		address, address).Scan(&res)
+
+	var topTokens []TopToken
+
+	models.DB.Raw(`SELECT t.address, t.name, t.symbol, t.volume, sum(trades.volume_usd) AS volume_last
+		FROM (
+			SELECT t.address, t.name, t.symbol, sum(trades.volume_usd) AS volume FROM tokens AS t, trades
+			WHERE (trades.base_token_address = t.address OR trades.quote_token_address = t.address)
+			AND (trades.maker_address = ? OR trades.taker_address = ?)
+			AND trades.date >= ? AND trades.date < ?
+			GROUP BY t.address, t.name, t.symbol
+			ORDER BY volume DESC LIMIT 3 OFFSET 0
+		) AS t, trades
+		WHERE (t.address = trades.base_token_address OR t.address = trades.quote_token_address)
+		AND (trades.maker_address = ? OR trades.taker_address = ?)
+		AND trades.date >= ? AND trades.date < ?
+		GROUP BY t.address, t.name, t.symbol, t.volume
+		ORDER BY t.volume DESC`,
+		address, address, time24hAgo, timeNow,
+		address, address, time48hAgo, time24hAgo).Scan(&topTokens)
+
+	for i, token := range topTokens {
+		if !token.VolumeLast.Equal(decimal.NewFromFloat32(0)) {
+			changeFloat64, _ := token.Volume.Sub(token.VolumeLast).Div(token.VolumeLast).Float64()
+			topTokens[i].VolumeChange = float32(changeFloat64)
+		}
+	}
+
+	res.TopTokens = topTokens
+
+	if !res.Volume24hLast.Equal(decimal.NewFromFloat32(0)) {
+		changeFloat64, _ := res.Volume24h.Sub(res.Volume24hLast).Div(res.Volume24hLast).Float64()
+		res.Volume24hChange = float32(changeFloat64)
+	}
+
+	if !res.Trades24hLast.Equal(decimal.NewFromFloat32(0)) {
+		changeFloat64, _ := res.Trades24h.Sub(res.Trades24hLast).Div(res.Trades24hLast).Float64()
+		res.Trades24hChange = float32(changeFloat64)
+	}
+
+	c.JSON(200, res)
+}
+
 func GetTradesChart(c *gin.Context) {
 	query := TradesChartQuery{"1M", "", "", ""}
 	c.BindQuery(&query)

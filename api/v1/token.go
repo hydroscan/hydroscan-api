@@ -1,13 +1,10 @@
 package apiv1
 
 import (
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/hydroscan/hydroscan-api/models"
 	"github.com/hydroscan/hydroscan-api/task"
 	"github.com/jinzhu/gorm"
-	"github.com/shopspring/decimal"
 )
 
 type TokensQuery struct {
@@ -110,61 +107,61 @@ func GetToken(c *gin.Context) {
 	}
 }
 
-func GetTokenChart(c *gin.Context) {
-	address := c.Params.ByName("address")
-	token := models.Token{}
-	if err := models.DB.Where("address = ?", address).First(&token).Error; gorm.IsRecordNotFoundError(err) {
-		c.AbortWithStatus(404)
-	}
+// func GetTokenChart(c *gin.Context) {
+// 	address := c.Params.ByName("address")
+// 	token := models.Token{}
+// 	if err := models.DB.Where("address = ?", address).First(&token).Error; gorm.IsRecordNotFoundError(err) {
+// 		c.AbortWithStatus(404)
+// 	}
 
-	filter := c.DefaultQuery("filter", "1M")
-	var res []struct {
-		Dt           time.Time       `json:"date"`
-		Sum          decimal.Decimal `json:"volume"`
-		TradesCount  uint64          `json:"trades"`
-		TradersCount uint64          `json:"traders"`
-	}
-	trunc := "day"
-	from := time.Now().Add(-30 * 24 * time.Hour)
-	switch filter {
-	case "24H":
-		trunc = "hour"
-		from = time.Now().Add(-24 * time.Hour)
-	case "7D":
-		trunc = "hour"
-		from = time.Now().Add(-7 * 24 * time.Hour)
-	case "1M":
-		trunc = "day"
-		from = time.Now().Add(-30 * 24 * time.Hour)
-	case "1Y":
-		trunc = "day"
-		from = time.Now().Add(-365 * 24 * time.Hour)
-	case "ALL":
-		trunc = "day"
-		from = time.Now().Add(-1000 * 24 * time.Hour)
-	default:
-		c.AbortWithStatus(404)
-		return
-	}
-	models.DB.Raw(`SELECT date_trunc(?, date) AS dt, sum(volume_usd), count(*) AS trades_count
-		FROM trades WHERE date >= ? AND (base_token_address = ? OR quote_token_address = ?)
-		GROUP BY dt ORDER BY dt`, trunc, from, address, address).Scan(&res)
+// 	filter := c.DefaultQuery("filter", "1M")
+// 	var res []struct {
+// 		Dt           time.Time       `json:"date"`
+// 		Sum          decimal.Decimal `json:"volume"`
+// 		TradesCount  uint64          `json:"trades"`
+// 		TradersCount uint64          `json:"traders"`
+// 	}
+// 	trunc := "day"
+// 	from := time.Now().Add(-30 * 24 * time.Hour)
+// 	switch filter {
+// 	case "24H":
+// 		trunc = "hour"
+// 		from = time.Now().Add(-24 * time.Hour)
+// 	case "7D":
+// 		trunc = "hour"
+// 		from = time.Now().Add(-7 * 24 * time.Hour)
+// 	case "1M":
+// 		trunc = "day"
+// 		from = time.Now().Add(-30 * 24 * time.Hour)
+// 	case "1Y":
+// 		trunc = "day"
+// 		from = time.Now().Add(-365 * 24 * time.Hour)
+// 	case "ALL":
+// 		trunc = "day"
+// 		from = time.Now().Add(-1000 * 24 * time.Hour)
+// 	default:
+// 		c.AbortWithStatus(404)
+// 		return
+// 	}
+// 	models.DB.Raw(`SELECT date_trunc(?, date) AS dt, sum(volume_usd), count(*) AS trades_count
+// 		FROM trades WHERE date >= ? AND (base_token_address = ? OR quote_token_address = ?)
+// 		GROUP BY dt ORDER BY dt`, trunc, from, address, address).Scan(&res)
 
-	var resTraders []struct {
-		TradersCount uint64 `json:"traders"`
-	}
-	// select traders
-	// SELECT dt, count(*) FROM (SELECT date_trunc('hour', date) AS dt, maker_address FROM trades WHERE date > '2019-02-26t00:00:00+08:00'UNION SELECT date_trunc('hour', date) AS dt, taker_address FROM trades WHERE date > '2019-02-26t00:00:00+08:00' ) AS traders GROUP BY dt ORDER BY dt;
-	models.DB.Raw(`SELECT dt, count(*) AS traders_count
-		FROM (
-		SELECT date_trunc(?, date) AS dt, maker_address FROM trades WHERE date > ? AND (base_token_address = ? OR quote_token_address = ?)
-		UNION
-		SELECT date_trunc(?, date) AS dt, taker_address FROM trades WHERE date > ? AND (base_token_address = ? OR quote_token_address = ?)
-		) AS traders GROUP BY dt ORDER BY dt`,
-		trunc, from, address, address,
-		trunc, from, address, address).Scan(&resTraders)
-	for i, _ := range res {
-		res[i].TradersCount = resTraders[i].TradersCount
-	}
-	c.JSON(200, res)
-}
+// 	var resTraders []struct {
+// 		TradersCount uint64 `json:"traders"`
+// 	}
+// 	// select traders
+// 	// SELECT dt, count(*) FROM (SELECT date_trunc('hour', date) AS dt, maker_address FROM trades WHERE date > '2019-02-26t00:00:00+08:00'UNION SELECT date_trunc('hour', date) AS dt, taker_address FROM trades WHERE date > '2019-02-26t00:00:00+08:00' ) AS traders GROUP BY dt ORDER BY dt;
+// 	models.DB.Raw(`SELECT dt, count(*) AS traders_count
+// 		FROM (
+// 		SELECT date_trunc(?, date) AS dt, maker_address FROM trades WHERE date > ? AND (base_token_address = ? OR quote_token_address = ?)
+// 		UNION
+// 		SELECT date_trunc(?, date) AS dt, taker_address FROM trades WHERE date > ? AND (base_token_address = ? OR quote_token_address = ?)
+// 		) AS traders GROUP BY dt ORDER BY dt`,
+// 		trunc, from, address, address,
+// 		trunc, from, address, address).Scan(&resTraders)
+// 	for i, _ := range res {
+// 		res[i].TradersCount = resTraders[i].TradersCount
+// 	}
+// 	c.JSON(200, res)
+// }
