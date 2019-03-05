@@ -89,6 +89,7 @@ func GetTrader(c *gin.Context) {
 	}
 
 	var res struct {
+		Address          string          `json:"address"`
 		Volume24h        decimal.Decimal `json:"volume24h"`
 		Volume24hLast    decimal.Decimal `json:"volume24hLast"`
 		Volume24hChange  float32         `json:"volume24hChange"`
@@ -152,6 +153,7 @@ func GetTrader(c *gin.Context) {
 		res.Trades24hChange = float32(changeFloat64)
 	}
 
+	res.Address = address
 	c.JSON(200, res)
 }
 
