@@ -11,10 +11,11 @@ type TokensQuery struct {
 	Page     int    `form:"page"`
 	PageSize int    `form:"pageSize"`
 	Filter   string `form:"filter"`
+	Keyword  string `form:"keyword"`
 }
 
 func GetTokens(c *gin.Context) {
-	query := TokensQuery{1, 25, "24H"}
+	query := TokensQuery{1, 25, "24H", ""}
 	c.BindQuery(&query)
 
 	order := "volume_24h desc"
@@ -37,7 +38,11 @@ func GetTokens(c *gin.Context) {
 	offset := (page - 1) * pageSize
 
 	var tokens []models.Token
-	if err := models.DB.Offset(offset).Limit(pageSize).Order(order).Find(&tokens).Error; gorm.IsRecordNotFoundError(err) {
+	statment := models.DB.Offset(offset).Limit(pageSize).Order(order)
+	if query.Keyword != "" {
+		statment = statment.Where("name ILIKE ? OR symbol ILIKE ?", "%"+query.Keyword+"%", "%"+query.Keyword+"%")
+	}
+	if err := statment.Find(&tokens).Error; gorm.IsRecordNotFoundError(err) {
 		c.AbortWithStatus(404)
 	} else {
 		for i, _ := range tokens {

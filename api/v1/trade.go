@@ -22,6 +22,7 @@ type TradesQuery struct {
 	TokenAddress      string `form:"tokenAddress"`
 	TraderAddress     string `form:"traderAddress"`
 	RelayerAddress    string `form:"relayerAddress"`
+	Transaction       string `form:"transaction"`
 }
 
 type TradesChartQuery struct {
@@ -32,7 +33,7 @@ type TradesChartQuery struct {
 }
 
 func GetTrades(c *gin.Context) {
-	query := TradesQuery{1, 25, "", "", "", "", ""}
+	query := TradesQuery{1, 25, "", "", "", "", "", ""}
 	c.BindQuery(&query)
 
 	page := query.Page
@@ -41,7 +42,9 @@ func GetTrades(c *gin.Context) {
 
 	var trades []models.Trade
 	statment := models.DB.Table("trades").Order("block_number desc").Order("log_index desc")
-	if query.BaseTokenAddress != "" && query.QuoteTokenAddress != "" {
+	if query.Transaction != "" {
+		statment = statment.Where("transaction_hash = ?", query.Transaction)
+	} else if query.BaseTokenAddress != "" && query.QuoteTokenAddress != "" {
 		statment = statment.Where("base_token_address = ? AND quote_token_address = ?", query.BaseTokenAddress, query.QuoteTokenAddress)
 	} else if query.TokenAddress != "" {
 		statment = statment.Where("base_token_address = ? OR quote_token_address = ?", query.TokenAddress, query.TokenAddress)
@@ -275,10 +278,7 @@ func GetTradesSearch(c *gin.Context) {
 	}
 
 	if utils.IsAddress(keyword) {
-		log.Info(("isAddress"))
 		if isTrue, searchKey := utils.IsToken(keyword); isTrue {
-			log.Info(("IsToken"))
-
 			res.SearchType = "TOKEN"
 			res.SearchKey = searchKey
 
@@ -292,44 +292,14 @@ func GetTradesSearch(c *gin.Context) {
 
 		}
 	} else if utils.IsTransaction(keyword) {
-		trades := []models.Trade{}
-
-		if err := models.DB.Where("transaction_hash ILIKE ?", "%"+keyword+"%").Order("id desc").Find(&trades).Error; err == nil {
-			res := struct {
-				SearchType   string         `json:"searchType"`
-				SearchKey    string         `json:"searchKey"`
-				SearchResult []models.Trade `json:"searchResult"`
-			}{}
-			res.SearchType = "TRADES"
-			res.SearchKey = keyword
-			res.SearchResult = trades
-			c.JSON(200, res)
-			return
-		}
+		res.SearchType = "TRANSACTION"
+		res.SearchKey = keyword
 
 	} else {
-		tokens := []models.Token{}
-
-		if err := models.DB.Where("name ILIKE ? or symbol ILIKE ?", "%"+keyword+"%", "%"+keyword+"%").Order("volume_24h desc").Find(&tokens).Error; err == nil {
-			res := struct {
-				SearchType   string         `json:"searchType"`
-				SearchKey    string         `json:"searchKey"`
-				SearchResult []models.Token `json:"searchResult"`
-			}{}
-			for i, _ := range tokens {
-				tradesData := task.GetTrades24hData(tokens[i].Address)
-				tokens[i].Trades24h = tradesData.Trades24h
-				tokens[i].Trades24hChange = tradesData.Trades24hChange
-				tokens[i].Traders24h = tradesData.Traders24h
-				tokens[i].Traders24hChange = tradesData.Traders24hChange
-				tokens[i].Amount24h = tradesData.Amount24h
-			}
-
+		token := models.Token{}
+		if err := models.DB.Where("name ILIKE ? or symbol ILIKE ?", "%"+keyword+"%", "%"+keyword+"%").Order("volume_24h desc").First(&token).Error; err == nil {
 			res.SearchType = "TOKENS"
 			res.SearchKey = keyword
-			res.SearchResult = tokens
-			c.JSON(200, res)
-			return
 		}
 	}
 
