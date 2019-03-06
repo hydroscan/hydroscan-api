@@ -26,6 +26,7 @@ func SubscribeLogs() {
 	for dialRetries == MaxReties || (err != nil && dialRetries > 0) {
 		client, err = ethclient.Dial(viper.GetString("web3_ws"))
 		dialRetries -= 1
+		time.Sleep(1000 * time.Millisecond)
 	}
 	if err != nil {
 		panic(err)
@@ -52,6 +53,7 @@ func SubscribeLogs() {
 			for err != nil && dialRetries > 0 {
 				client, err = ethclient.Dial(viper.GetString("web3_ws"))
 				dialRetries -= 1
+				time.Sleep(1000 * time.Millisecond)
 			}
 			if err != nil {
 				panic(err)
@@ -77,6 +79,7 @@ func SubscribeLogs() {
 			for err != nil && dialRetries > 0 {
 				client, err = ethclient.Dial(viper.GetString("web3_ws"))
 				dialRetries -= 1
+				time.Sleep(1000 * time.Millisecond)
 			}
 			if err != nil {
 				panic(err)
