@@ -1,6 +1,7 @@
 package apiv1
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -98,6 +99,7 @@ func getTokensByKeyword(page int, pageSize int, offset int, keyword string) ResT
 	var tokens []ResToken
 	res := ResType{page, pageSize, 0, tokens}
 
+	keyword = strings.TrimSpace(keyword)
 	models.DB.Raw("SELECT * FROM tokens WHERE name ILIKE ? OR symbol ILIKE ? ORDER BY volume_24h DESC LIMIT ? OFFSET ?",
 		"%"+keyword+"%", "%"+keyword+"%", pageSize, offset).Scan(&tokens)
 
