@@ -46,7 +46,7 @@ func SubscribeLogs() {
 	for {
 		select {
 		case err := <-sub.Err():
-			log.Warn("select sub err", err)
+			log.Warn("select sub err ", err)
 
 			dialRetries = MaxReties
 			for err != nil && dialRetries > 0 {
