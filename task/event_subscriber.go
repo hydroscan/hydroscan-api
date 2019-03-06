@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const MaxReties = 3
+const MaxReties = 5
 
 func SubscribeLogs() {
 	FetchHistoricalLogs()
