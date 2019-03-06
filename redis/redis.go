@@ -14,5 +14,5 @@ func Connect() {
 		panic(err)
 	}
 	Client = redis.NewClient(opt)
-	log.Info("Reids Connected")
+	log.Info("Redis Connected")
 }

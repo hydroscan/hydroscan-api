@@ -95,20 +95,20 @@ func GetRelayer(c *gin.Context) {
 			address).Scan(&res)
 
 		var topTokens []TopToken
-
-		models.DB.Raw(`SELECT t.address, t.name, t.symbol, t.volume, sum(trades.volume_usd) AS volume_last
+		const baseFields = "t.address, t.name, t.symbol"
+		models.DB.Raw(`SELECT `+baseFields+`, t.volume, sum(trades.volume_usd) AS volume_last
 		FROM (
-			SELECT t.address, t.name, t.symbol, sum(trades.volume_usd) AS volume FROM tokens AS t, trades
+			SELECT `+baseFields+`, sum(trades.volume_usd) AS volume FROM tokens AS t, trades
 			WHERE (trades.base_token_address = t.address OR trades.quote_token_address = t.address)
 			AND relayer_address = ?
 			AND trades.date >= ? AND trades.date < ?
-			GROUP BY t.address, t.name, t.symbol
+			GROUP BY `+baseFields+`
 			ORDER BY volume DESC LIMIT 3 OFFSET 0
 		) AS t LEFT JOIN trades
 		ON (t.address = trades.base_token_address OR t.address = trades.quote_token_address)
 		AND relayer_address = ?
 		AND trades.date >= ? AND trades.date < ?
-		GROUP BY t.address, t.name, t.symbol, t.volume
+		GROUP BY `+baseFields+`, t.volume
 		ORDER BY t.volume DESC`,
 			address, time24hAgo, timeNow,
 			address, time48hAgo, time24hAgo).Scan(&topTokens)
