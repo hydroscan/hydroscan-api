@@ -13,8 +13,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const MaxReties = 5
-
 func SubscribeLogs() {
 	FetchHistoricalLogs()
 
@@ -71,7 +69,7 @@ func SubscribeLogs() {
 			saveEventLog(eventLog)
 
 		case <-time.After(60 * time.Second):
-			log.Warn("timeout 1min")
+			log.Warn("timeout 1min retry dial")
 
 			dialRetries = MaxReties
 			for err != nil && dialRetries > 0 {

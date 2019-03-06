@@ -18,6 +18,8 @@ var EthClient *ethclient.Client
 var contractABI abi.ABI
 var err error
 
+const MaxReties = 5
+
 func InitEthClient() {
 	if viper.GetString("resource_path") != "" {
 		ResourcePath = viper.GetString("resource_path")

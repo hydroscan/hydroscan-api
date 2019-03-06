@@ -157,10 +157,21 @@ func getLastBlockNumber() uint64 {
 func getBlockTime(blockNumber uint64) uint64 {
 	log.Info("getBlockTime ", blockNumber)
 	blockNumberBigInt := big.NewInt(int64(blockNumber))
-	block, err := EthClient.BlockByNumber(context.Background(), blockNumberBigInt)
+
+	var block *types.Block
+	var err error
+	dialRetries := MaxReties
+
+	for dialRetries == MaxReties || (err != nil && dialRetries > 0) {
+		log.Info("getBlockTime dialRetries ", dialRetries)
+		block, err = EthClient.BlockByNumber(context.Background(), blockNumberBigInt)
+		dialRetries -= 1
+		time.Sleep(1000 * time.Millisecond)
+	}
 	if err != nil {
-		log.Info("getBlockTime err")
+		log.Warn("getBlockTime err ")
 		panic(err)
 	}
+
 	return block.Time().Uint64()
 }
