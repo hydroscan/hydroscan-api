@@ -163,10 +163,12 @@ func getBlockTime(blockNumber uint64) uint64 {
 	dialRetries := MaxReties
 
 	for dialRetries == MaxReties || (err != nil && dialRetries > 0) {
+		if dialRetries != MaxReties {
+			time.Sleep(1000 * time.Millisecond)
+		}
 		log.Info("getBlockTime dialRetries ", dialRetries)
 		block, err = EthClient.BlockByNumber(context.Background(), blockNumberBigInt)
 		dialRetries -= 1
-		time.Sleep(1000 * time.Millisecond)
 	}
 	if err != nil {
 		log.Warn("getBlockTime err ")
