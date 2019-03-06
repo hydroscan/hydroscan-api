@@ -142,7 +142,7 @@ func getFromBlockNumber() uint64 {
 	} else {
 		number = mTrade.BlockNumber
 	}
-	log.Info(number)
+	log.Info("getFromBlockNumber ", number)
 	return number
 }
 
