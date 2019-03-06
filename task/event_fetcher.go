@@ -155,6 +155,7 @@ func getLastBlockNumber() uint64 {
 }
 
 func getBlockTime(blockNumber uint64) uint64 {
+	log.Info("getBlockTime ", blockNumber)
 	blockNumberBigInt := big.NewInt(int64(blockNumber))
 	block, err := EthClient.BlockByNumber(context.Background(), blockNumberBigInt)
 	if err != nil {

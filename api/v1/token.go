@@ -38,11 +38,11 @@ func GetTokens(c *gin.Context) {
 	offset := (page - 1) * pageSize
 
 	var tokens []models.Token
-	statment := models.DB.Offset(offset).Limit(pageSize).Order(order)
+	statment := models.DB.Order(order)
 	if query.Keyword != "" {
 		statment = statment.Where("name ILIKE ? OR symbol ILIKE ?", "%"+query.Keyword+"%", "%"+query.Keyword+"%")
 	}
-	if err := statment.Find(&tokens).Error; gorm.IsRecordNotFoundError(err) {
+	if err := statment.Offset(offset).Limit(pageSize).Find(&tokens).Error; gorm.IsRecordNotFoundError(err) {
 		c.AbortWithStatus(404)
 	} else {
 		for i, _ := range tokens {
@@ -62,6 +62,7 @@ func GetTokens(c *gin.Context) {
 		}
 		res := resType{page, pageSize, 0, tokens}
 		models.DB.Table("tokens").Count(&res.Count)
+		// statment.Count(&res.Count)
 
 		c.JSON(200, res)
 	}

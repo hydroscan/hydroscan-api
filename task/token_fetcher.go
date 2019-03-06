@@ -75,6 +75,7 @@ func UpdateTokenPrices() {
 }
 
 func GetTokenInfo(address string) TokenInfo {
+	log.Info("GetTokenInfo ", address)
 	url := "http://api.ethplorer.io/getTokenInfo/" + address + "?apiKey=" + viper.GetString("ethplorer_apikey")
 	resp, err := http.Get(url)
 	if err != nil {
@@ -86,7 +87,6 @@ func GetTokenInfo(address string) TokenInfo {
 		panic(err)
 	}
 
-	log.Info(resp)
 	tokenInfo := TokenInfo{}
 	json.Unmarshal([]byte(body), &tokenInfo)
 	// ethplorer api return decimals type can be string or number
