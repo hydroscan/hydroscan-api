@@ -44,6 +44,7 @@ func SubscribeLogs() {
 		panic(err)
 	}
 
+	log.Info("for select run")
 	for {
 		select {
 		case err := <-sub.Err():
@@ -71,9 +72,6 @@ func SubscribeLogs() {
 
 		case <-time.After(60 * time.Second):
 			log.Warn("timeout 1min")
-
-		case <-time.After(120 * time.Second):
-			log.Warn("timeout 2mins")
 
 			dialRetries = MaxReties
 			for err != nil && dialRetries > 0 {
