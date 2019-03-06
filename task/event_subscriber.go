@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -35,6 +36,7 @@ func SubscribeLogs() {
 		Addresses: []common.Address{contractAddress},
 	}
 
+	log.Info("SubscribeFilterLogs")
 	eventLogs := make(chan types.Log)
 	sub, err := client.SubscribeFilterLogs(context.Background(), query, eventLogs)
 	if err != nil {
@@ -44,7 +46,7 @@ func SubscribeLogs() {
 	for {
 		select {
 		case err := <-sub.Err():
-			log.Warn(err)
+			log.Warn("select sub err", err)
 
 			dialRetries = MaxReties
 			for err != nil && dialRetries > 0 {
@@ -64,6 +66,26 @@ func SubscribeLogs() {
 			log.Info("recieve log: ", eventLog.BlockNumber, eventLog.Index)
 			checkMissingBlocks(eventLog.BlockNumber)
 			saveEventLog(eventLog)
+
+		case <-time.After(60 * time.Second):
+			log.Warn("timeout 1min")
+
+		case <-time.After(120 * time.Second):
+			log.Warn("timeout 2mins")
+
+			dialRetries = MaxReties
+			for err != nil && dialRetries > 0 {
+				client, err = ethclient.Dial(viper.GetString("web3_ws"))
+				dialRetries -= 1
+			}
+			if err != nil {
+				panic(err)
+			}
+
+			sub, err = client.SubscribeFilterLogs(context.Background(), query, eventLogs)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }

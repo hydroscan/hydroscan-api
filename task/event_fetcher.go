@@ -159,6 +159,7 @@ func getBlockTime(blockNumber uint64) uint64 {
 	blockNumberBigInt := big.NewInt(int64(blockNumber))
 	block, err := EthClient.BlockByNumber(context.Background(), blockNumberBigInt)
 	if err != nil {
+		log.Info("getBlockTime err")
 		panic(err)
 	}
 	return block.Time().Uint64()
