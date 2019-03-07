@@ -32,6 +32,11 @@ type ResToken struct {
 	Traders24h      uint64          `json:"traders24h"`
 	PriceUSD        decimal.Decimal `gorm:"column:price_usd" json:"priceUSD"`
 	PriceUpdatedAt  time.Time       `gorm:"column:price_updated_at" json:"priceUpdatedAt"`
+
+	// for top tokens
+	Volume7d       decimal.Decimal `gorm:"column:volume_7d;type:decimal(32,18)" json:"volume7d"`
+	Volume7dChange float32         `gorm:"column:volume_7d_change" json:"volume7dChange"`
+	VolumeAll      decimal.Decimal `gorm:"column:volume_all;type:decimal(32,18)" json:"volumeAll"`
 }
 
 type ResType struct {
