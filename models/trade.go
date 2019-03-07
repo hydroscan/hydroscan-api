@@ -15,7 +15,7 @@ type Trade struct {
 	BlockNumber        uint64          `gorm:"column:block_number;index;unique_index:idx_block_number_log_index" json:"blockNumber"`
 	BlockHash          string          `gorm:"column:block_hash" json:"blockHash"`
 	TransactionHash    string          `gorm:"column:transaction_hash" json:"transactionHash"`
-	LogIndex           uint            `gorm:"column:log_index;;unique_index:idx_block_number_log_index" json:"logIndex"`
+	LogIndex           uint            `gorm:"column:log_index;unique_index:idx_block_number_log_index" json:"logIndex"`
 	Date               time.Time       `gorm:"column:date;index" json:"date"`
 	QuoteTokenPriceUSD decimal.Decimal `gorm:"column:quote_token_price_usd;type:decimal(32,18)" json:"quoteTokenPriceUSD"`
 	VolumeUSD          decimal.Decimal `gorm:"column:volume_usd;type:decimal(32,18)" json:"volumeUSD"`
