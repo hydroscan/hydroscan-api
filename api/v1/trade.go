@@ -55,7 +55,7 @@ func GetTrades(c *gin.Context) {
 	}
 
 	if err := statment.Offset(offset).Limit(pageSize).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").Find(&trades).Error; gorm.IsRecordNotFoundError(err) {
-		c.AbortWithStatus(404)
+		c.JSON(404, gin.H{"msg": "not found"})
 	} else {
 		type resType struct {
 			Page     int            `json:"page"`
@@ -74,7 +74,7 @@ func GetTrade(c *gin.Context) {
 	uuid := c.Params.ByName("uuid")
 	trade := models.Trade{}
 	if err := models.DB.Where("uuid = ?", uuid).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").First(&trade).Error; gorm.IsRecordNotFoundError(err) {
-		c.AbortWithStatus(404)
+		c.JSON(404, gin.H{"msg": "not found"})
 	} else {
 		c.JSON(200, trade)
 	}
@@ -185,7 +185,7 @@ func GetTradesChart(c *gin.Context) {
 		trunc = "day"
 		from = time.Now().Add(-1000 * 24 * time.Hour)
 	default:
-		c.AbortWithStatus(404)
+		c.JSON(404, gin.H{"msg": "not found"})
 		return
 	}
 
