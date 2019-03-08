@@ -13,7 +13,7 @@ import (
 func GetRelayers(c *gin.Context) {
 	var relayers []models.Relayer
 	if err := models.DB.Find(&relayers).Error; gorm.IsRecordNotFoundError(err) {
-		c.JSON(404, gin.H{"msg": "not found"})
+		c.JSON(404, relayers)
 	} else {
 		c.JSON(200, relayers)
 	}
@@ -28,12 +28,12 @@ func GetRelayer(c *gin.Context) {
 		if isTrue, key := utils.IsRelayer(slug); isTrue {
 			statment = models.DB.Where("address = ?", key)
 		} else {
-			c.JSON(404, gin.H{"msg": "not found"})
+			c.JSON(404, relayer)
 		}
 	}
 
 	if err := statment.First(&relayer).Error; gorm.IsRecordNotFoundError(err) {
-		c.JSON(404, gin.H{"msg": "not found"})
+		c.JSON(404, relayer)
 	} else {
 		address := relayer.Address
 		type TopToken struct {

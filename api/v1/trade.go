@@ -54,15 +54,16 @@ func GetTrades(c *gin.Context) {
 		statment = statment.Where("relayer_address = ?", query.RelayerAddress)
 	}
 
+	type resType struct {
+		Page     int            `json:"page"`
+		PageSize int            `json:"pageSize"`
+		Count    uint64         `json:"count"`
+		Trades   []models.Trade `json:"trades"`
+	}
 	if err := statment.Offset(offset).Limit(pageSize).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").Find(&trades).Error; gorm.IsRecordNotFoundError(err) {
-		c.JSON(404, gin.H{"msg": "not found"})
+		res := resType{page, pageSize, 0, trades}
+		c.JSON(404, res)
 	} else {
-		type resType struct {
-			Page     int            `json:"page"`
-			PageSize int            `json:"pageSize"`
-			Count    uint64         `json:"count"`
-			Trades   []models.Trade `json:"trades"`
-		}
 		res := resType{page, pageSize, 0, trades}
 		statment.Count(&res.Count)
 
@@ -74,7 +75,7 @@ func GetTrade(c *gin.Context) {
 	uuid := c.Params.ByName("uuid")
 	trade := models.Trade{}
 	if err := models.DB.Where("uuid = ?", uuid).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").First(&trade).Error; gorm.IsRecordNotFoundError(err) {
-		c.JSON(404, gin.H{"msg": "not found"})
+		c.JSON(404, trade)
 	} else {
 		c.JSON(200, trade)
 	}
@@ -82,6 +83,7 @@ func GetTrade(c *gin.Context) {
 
 func GetTrader(c *gin.Context) {
 	address := c.Params.ByName("address")
+
 	type TopToken struct {
 		Address      string          `json:"address"`
 		Name         string          `json:"name"`
@@ -101,6 +103,11 @@ func GetTrader(c *gin.Context) {
 		Trades24hChange  float32         `json:"trades24hChange"`
 		TotalMakerRabate decimal.Decimal `json:"totalMakerRabate"`
 		TopTokens        []TopToken      `json:"topTokens"`
+	}
+
+	trade := models.Trade{}
+	if err := models.DB.Where("maker_address = ? OR taker_address = ?", address, address).First(&trade).Error; gorm.IsRecordNotFoundError(err) {
+		c.JSON(404, res)
 	}
 
 	timeNow := time.Now()
