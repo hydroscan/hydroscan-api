@@ -9,7 +9,7 @@ import (
 )
 
 func Limit() gin.HandlerFunc {
-	// Define a limit rate to 300 requests per minute.
+	// Define a limit rate to 'Limit' requests per minute.
 	rate := limiter.Rate{
 		Period: 1 * time.Minute,
 		Limit:  120,
