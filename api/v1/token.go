@@ -167,6 +167,7 @@ func getTokensByTrader(page int, pageSize int, offset int, traderAddress string)
 
 		tokens[i].Amount24h = result.AsBaseTokenAmount24h.Add(result.AsQuoteTokenAmount24h)
 
+		tokens[i].Volume24hChange = -2
 		if !token.Volume24hLast.Equal(decimal.NewFromFloat32(0)) {
 			changeFloat64, _ := token.Volume24h.Sub(token.Volume24hLast).Div(token.Volume24hLast).Float64()
 			tokens[i].Volume24hChange = float32(changeFloat64)
@@ -248,6 +249,7 @@ func getTokensByRelayer(page int, pageSize int, offset int, relayerAddress strin
 		tokens[i].Amount24h = result.AsBaseTokenAmount24h.Add(result.AsQuoteTokenAmount24h)
 		tokens[i].Traders24h = result.Traders24h
 
+		tokens[i].Volume24hChange = -2
 		if !token.Volume24hLast.Equal(decimal.NewFromFloat32(0)) {
 			changeFloat64, _ := token.Volume24h.Sub(token.Volume24hLast).Div(token.Volume24hLast).Float64()
 			tokens[i].Volume24hChange = float32(changeFloat64)

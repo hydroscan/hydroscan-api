@@ -41,7 +41,8 @@ func UpdateTokenVolume24h() {
 		models.DB.Raw("SELECT sum(volume_usd) AS volume24h_last FROM trades WHERE date > ? AND date <= ? AND (base_token_address = ? OR quote_token_address = ?)",
 			time48hAgo, time24hAgo, token.Address, token.Address).Scan(&result)
 
-		var change float32 = 0
+		// the minimum change is -1 (-100%), so using -2 represent not a number
+		var change float32 = -2
 		if !result.Volume24hLast.Equal(decimal.NewFromFloat32(0)) {
 			changeFloat64, _ := result.Volume24h.Sub(result.Volume24hLast).Div(result.Volume24hLast).Float64()
 			change = float32(changeFloat64)
@@ -75,7 +76,7 @@ func UpdateTokenVolume7d() {
 		models.DB.Raw("SELECT sum(volume_usd) AS volume7d_last FROM trades WHERE date > ? AND date <= ? AND (base_token_address = ? OR quote_token_address = ?)",
 			time14dAgo, time7dAgo, token.Address, token.Address).Scan(&result)
 
-		var change float32 = 0
+		var change float32 = -2
 		if !result.Volume7dLast.Equal(decimal.NewFromFloat32(0)) {
 			changeFloat64, _ := result.Volume7d.Sub(result.Volume7dLast).Div(result.Volume7dLast).Float64()
 			change = float32(changeFloat64)
@@ -106,7 +107,7 @@ func UpdateTokenVolume1m() {
 		models.DB.Raw("SELECT sum(volume_usd) AS volume1m_last FROM trades WHERE date > ? AND date <= ? AND (base_token_address = ? OR quote_token_address = ?)",
 			time2mAgo, time1mAgo, token.Address, token.Address).Scan(&result)
 
-		var change float32 = 0
+		var change float32 = -2
 		if !result.Volume1mLast.Equal(decimal.NewFromFloat32(0)) {
 			changeFloat64, _ := result.Volume1m.Sub(result.Volume1mLast).Div(result.Volume1mLast).Float64()
 			change = float32(changeFloat64)
@@ -180,12 +181,12 @@ func UpdateTokenTrades24h() {
 		models.DB.Raw("SELECT sum(quote_token_amount) AS as_quote_token_amount24h FROM trades WHERE date > ? AND date <= ? AND quote_token_address = ?",
 			time24hAgo, timeNow, token.Address).Scan(&result)
 
-		var trades24hChange float32 = 0
+		var trades24hChange float32 = -2
 		if result.Trades24hLast != 0 {
 			trades24hChange = float32((float64(result.Trades24h) - float64(result.Trades24hLast)) / float64(result.Trades24hLast))
 		}
 
-		var traders24hChange float32 = 0
+		var traders24hChange float32 = -2
 		if result.Traders24hLast != 0 {
 			traders24hChange = float32((float64(result.Traders24h) - float64(result.Traders24hLast)) / float64(result.Traders24hLast))
 		}

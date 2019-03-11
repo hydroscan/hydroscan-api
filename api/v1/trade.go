@@ -146,6 +146,7 @@ func GetTrader(c *gin.Context) {
 		address, address, time48hAgo, time24hAgo).Scan(&topTokens)
 
 	for i, token := range topTokens {
+		topTokens[i].VolumeChange = -2
 		if !token.VolumeLast.Equal(decimal.NewFromFloat32(0)) {
 			changeFloat64, _ := token.Volume.Sub(token.VolumeLast).Div(token.VolumeLast).Float64()
 			topTokens[i].VolumeChange = float32(changeFloat64)
@@ -154,11 +155,13 @@ func GetTrader(c *gin.Context) {
 
 	res.TopTokens = topTokens
 
+	res.Volume24hChange = -2
 	if !res.Volume24hLast.Equal(decimal.NewFromFloat32(0)) {
 		changeFloat64, _ := res.Volume24h.Sub(res.Volume24hLast).Div(res.Volume24hLast).Float64()
 		res.Volume24hChange = float32(changeFloat64)
 	}
 
+	res.Trades24hChange = -2
 	if !res.Trades24hLast.Equal(decimal.NewFromFloat32(0)) {
 		changeFloat64, _ := res.Trades24h.Sub(res.Trades24hLast).Div(res.Trades24hLast).Float64()
 		res.Trades24hChange = float32(changeFloat64)
