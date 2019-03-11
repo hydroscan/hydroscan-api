@@ -101,7 +101,7 @@ func GetTrader(c *gin.Context) {
 		Trades24h        decimal.Decimal `json:"trades24h"`
 		Trades24hLast    decimal.Decimal `json:"trades24hLast"`
 		Trades24hChange  float32         `json:"trades24hChange"`
-		TotalMakerRabate decimal.Decimal `json:"totalMakerRabate"`
+		TotalMakerRebate decimal.Decimal `json:"totalMakerRebate"`
 		TopTokens        []TopToken      `json:"topTokens"`
 	}
 
@@ -122,7 +122,7 @@ func GetTrader(c *gin.Context) {
 		FROM trades WHERE (trades.maker_address = ? OR trades.taker_address = ?) AND date >= ? AND date < ?`,
 		address, address, time48hAgo, time24hAgo).Scan(&res)
 
-	models.DB.Raw(`SELECT sum(maker_rebate) FROM trades WHERE (trades.maker_address = ? OR trades.taker_address = ?)`,
+	models.DB.Raw(`SELECT sum(maker_rebate) AS total_maker_rebate FROM trades WHERE (trades.maker_address = ? OR trades.taker_address = ?)`,
 		address, address).Scan(&res)
 
 	var topTokens []TopToken
