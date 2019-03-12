@@ -62,7 +62,6 @@ func SubscribeLogs() {
 				panic(err)
 			}
 
-			eventLogs = make(chan types.Log)
 			sub, err = client.SubscribeFilterLogs(context.Background(), query, eventLogs)
 			if err != nil {
 				panic(err)
@@ -75,24 +74,8 @@ func SubscribeLogs() {
 
 		case <-time.After(60 * time.Second):
 			log.Warn("timeout 1min retry dial")
-
-			dialRetries = MaxReties
-			for err != nil && dialRetries > 0 {
-				if dialRetries != MaxReties {
-					time.Sleep(1000 * time.Millisecond)
-				}
-				client, err = ethclient.Dial(viper.GetString("web3_ws"))
-				dialRetries -= 1
-			}
-			if err != nil {
-				panic(err)
-			}
-
-			eventLogs = make(chan types.Log)
-			sub, err = client.SubscribeFilterLogs(context.Background(), query, eventLogs)
-			if err != nil {
-				panic(err)
-			}
+			// https://github.com/ethereum/go-ethereum/blob/245f3146c26698193c4b479e7bc5825b058c444a/rpc/subscription.go#L243
+			sub.Unsubscribe()
 		}
 	}
 }
