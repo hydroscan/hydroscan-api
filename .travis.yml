@@ -1,12 +1,13 @@
-stages:
-  - build
+sudo: required
 
-build:
-  language: bash
-  services:
-    - docker
-  stage: build
-  script:
+services:
+  - docker
+
+branches:
+  only:
+    - master
+
+script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     - docker build -t wlchn/hydroscan-api .
     - docker push wlchn/hydroscan-api
