@@ -1,7 +1,12 @@
-services:
-  - docker
+stages:
+  - build
 
 build:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker build -t wlchn/hydroscan-api .
-  - docker push wlchn/hydroscan-api
+  language: bash
+  services:
+    - docker
+  stage: build
+  script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    - docker build -t wlchn/hydroscan-api .
+    - docker push wlchn/hydroscan-api
