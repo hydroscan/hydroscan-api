@@ -62,6 +62,7 @@ func SubscribeLogs() {
 				panic(err)
 			}
 
+			eventLogs = make(chan types.Log)
 			sub, err = client.SubscribeFilterLogs(context.Background(), query, eventLogs)
 			if err != nil {
 				panic(err)
@@ -87,6 +88,7 @@ func SubscribeLogs() {
 				panic(err)
 			}
 
+			eventLogs = make(chan types.Log)
 			sub, err = client.SubscribeFilterLogs(context.Background(), query, eventLogs)
 			if err != nil {
 				panic(err)
