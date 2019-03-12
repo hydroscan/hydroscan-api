@@ -1,13 +1,18 @@
 sudo: required
 
-services:
-  - docker
+stages:
+  - build
+  - name: deploy
+    if: branch = master
 
-branches:
-  only:
-    - master
-
-script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    - docker build -t wlchn/hydroscan-api .
-    - docker push wlchn/hydroscan-api
+jobs:
+  include:
+    - stage: build
+      services:
+        - docker
+      script:
+          - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          - docker build -t wlchn/hydroscan-api .
+          - docker push wlchn/hydroscan-api
+    - stage: deploy
+      script: echo "hello hydroscan"
