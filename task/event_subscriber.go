@@ -39,7 +39,9 @@ func SubscribeLogs() {
 
 	log.Info("SubscribeFilterLogs")
 	eventLogs := make(chan types.Log)
-	sub, err := client.SubscribeFilterLogs(context.Background(), query, eventLogs)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	sub, err := client.SubscribeFilterLogs(ctx, query, eventLogs)
 	if err != nil {
 		panic(err)
 	}
@@ -52,6 +54,7 @@ func SubscribeLogs() {
 
 			dialRetries = MaxReties
 			for err != nil && dialRetries > 0 {
+				log.Info("dialRetries: ", dialRetries)
 				if dialRetries != MaxReties {
 					time.Sleep(1000 * time.Millisecond)
 				}
@@ -62,7 +65,10 @@ func SubscribeLogs() {
 				panic(err)
 			}
 
-			sub, err = client.SubscribeFilterLogs(context.Background(), query, eventLogs)
+			log.Info("retry SubscribeFilterLogs")
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			sub, err = client.SubscribeFilterLogs(ctx, query, eventLogs)
 			if err != nil {
 				panic(err)
 			}
@@ -74,6 +80,7 @@ func SubscribeLogs() {
 
 		case <-time.After(60 * time.Second):
 			log.Warn("timeout 1min retry dial")
+			// client.Close()
 			// https://github.com/ethereum/go-ethereum/blob/245f3146c26698193c4b479e7bc5825b058c444a/rpc/subscription.go#L243
 			sub.Unsubscribe()
 		}
