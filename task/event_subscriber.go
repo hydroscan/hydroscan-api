@@ -72,6 +72,7 @@ func SubscribeLogs() {
 			if err != nil {
 				panic(err)
 			}
+			log.Info("subscribed")
 
 		case eventLog := <-eventLogs:
 			log.Info("recieve log: ", eventLog.BlockNumber, eventLog.Index)
