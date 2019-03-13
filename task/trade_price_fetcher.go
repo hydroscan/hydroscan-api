@@ -30,6 +30,7 @@ func UpdateHistoryTradePrice() {
 	for address, slug := range coinmarketcapSlugs {
 		missingTime := MissingTime{}
 		log.Info(address)
+		log.Info(slug)
 		models.DB.Raw("SELECT min(date), max(date) FROM trades WHERE quote_token_price_usd = 0 AND quote_token_address = ?", address).Scan(&missingTime)
 		if missingTime.Min.IsZero() { // no missing price
 			continue
