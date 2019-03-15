@@ -80,7 +80,7 @@ func SubscribeLogs() {
 			saveEventLog(eventLog)
 
 		case <-time.After(60 * time.Second):
-			log.Warn("timeout 1min retry dial")
+			log.Info("timeout 1min retry dial")
 			// https://github.com/ethereum/go-ethereum/blob/245f3146c26698193c4b479e7bc5825b058c444a/rpc/subscription.go#L243
 			sub.Unsubscribe()
 		}
