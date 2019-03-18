@@ -6,7 +6,6 @@ import (
 	"github.com/hydroscan/hydroscan-api/redis"
 	"github.com/hydroscan/hydroscan-api/task"
 	"github.com/jasonlvhit/gocron"
-	_ "github.com/joho/godotenv/autoload"
 	log "github.com/sirupsen/logrus"
 )
 

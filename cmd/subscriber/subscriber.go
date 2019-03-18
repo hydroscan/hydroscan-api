@@ -7,7 +7,6 @@ import (
 	"github.com/hydroscan/hydroscan-api/models"
 	"github.com/hydroscan/hydroscan-api/redis"
 	"github.com/hydroscan/hydroscan-api/task"
-	_ "github.com/joho/godotenv/autoload"
 	log "github.com/sirupsen/logrus"
 )
 
