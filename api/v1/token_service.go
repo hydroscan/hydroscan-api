@@ -9,6 +9,15 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+type TopToken struct {
+	Address      string          `json:"address"`
+	Name         string          `json:"name"`
+	Symbol       string          `json:"symbol"`
+	Volume       decimal.Decimal `json:"volume"`
+	VolumeLast   decimal.Decimal `json:"volumeLast"`
+	VolumeChange float32         `json:"volumeChange"`
+}
+
 type TokensQuery struct {
 	Page           int    `form:"page"`
 	PageSize       int    `form:"pageSize"`
@@ -18,7 +27,7 @@ type TokensQuery struct {
 	RelayerAddress string `form:"relayerAddress"`
 }
 
-type ResToken struct {
+type TokenRes struct {
 	Address         string          `json:"address"`
 	Name            string          `json:"name"`
 	Symbol          string          `json:"symbol"`
@@ -36,16 +45,16 @@ type ResToken struct {
 	VolumeAll      decimal.Decimal `gorm:"column:volume_all;type:decimal(32,18)" json:"volumeAll"`
 }
 
-type ResType struct {
+type TokensRes struct {
 	Page     int        `json:"page"`
 	PageSize int        `json:"pageSize"`
 	Count    uint64     `json:"count"`
-	Tokens   []ResToken `json:"tokens"`
+	Tokens   []TokenRes `json:"tokens"`
 }
 
-func getTokensDefault(page int, pageSize int, offset int, filter string) ResType {
-	var tokens []ResToken
-	res := ResType{page, pageSize, 0, tokens}
+func getTokensDefault(page int, pageSize int, offset int, filter string) TokensRes {
+	var tokens []TokenRes
+	res := TokensRes{page, pageSize, 0, tokens}
 
 	orderField := "volume_24h"
 	switch filter {
@@ -73,9 +82,9 @@ func getTokensDefault(page int, pageSize int, offset int, filter string) ResType
 	return res
 }
 
-func getTokensByKeyword(page int, pageSize int, offset int, keyword string) ResType {
-	var tokens []ResToken
-	res := ResType{page, pageSize, 0, tokens}
+func getTokensByKeyword(page int, pageSize int, offset int, keyword string) TokensRes {
+	var tokens []TokenRes
+	res := TokensRes{page, pageSize, 0, tokens}
 
 	keyword = strings.TrimSpace(keyword)
 	models.DB.Raw("SELECT * FROM tokens WHERE name ILIKE ? OR symbol ILIKE ? ORDER BY volume_24h DESC LIMIT ? OFFSET ?",
@@ -93,9 +102,9 @@ func getTokensByKeyword(page int, pageSize int, offset int, keyword string) ResT
 	return res
 }
 
-func getTokensByTrader(page int, pageSize int, offset int, traderAddress string) ResType {
-	var tokens []ResToken
-	res := ResType{page, pageSize, 0, tokens}
+func getTokensByTrader(page int, pageSize int, offset int, traderAddress string) TokensRes {
+	var tokens []TokenRes
+	res := TokensRes{page, pageSize, 0, tokens}
 
 	timeNow := time.Now()
 	time24hAgo := time.Now().Add(-24 * time.Hour)
@@ -160,9 +169,9 @@ func getTokensByTrader(page int, pageSize int, offset int, traderAddress string)
 	return res
 }
 
-func getTokensByRelayer(page int, pageSize int, offset int, relayerAddress string) ResType {
-	var tokens []ResToken
-	res := ResType{page, pageSize, 0, tokens}
+func getTokensByRelayer(page int, pageSize int, offset int, relayerAddress string) TokensRes {
+	var tokens []TokenRes
+	res := TokensRes{page, pageSize, 0, tokens}
 
 	timeNow := time.Now()
 	time24hAgo := time.Now().Add(-24 * time.Hour)

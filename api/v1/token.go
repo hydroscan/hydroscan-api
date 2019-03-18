@@ -17,7 +17,7 @@ func GetTokens(c *gin.Context) {
 	pageSize := query.PageSize
 	offset := (page - 1) * pageSize
 
-	var res ResType
+	var res TokensRes
 	if query.Keyword != "" {
 		res = getTokensByKeyword(page, pageSize, offset, query.Keyword)
 	} else if query.RelayerAddress != "" {

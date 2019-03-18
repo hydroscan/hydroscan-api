@@ -7,15 +7,6 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type TopToken struct {
-	Address      string          `json:"address"`
-	Name         string          `json:"name"`
-	Symbol       string          `json:"symbol"`
-	Volume       decimal.Decimal `json:"volume"`
-	VolumeLast   decimal.Decimal `json:"volumeLast"`
-	VolumeChange float32         `json:"volumeChange"`
-}
-
 type RelayerRes struct {
 	Name             string          `json:"name"`
 	Url              string          `json:"url"`
