@@ -1,13 +1,10 @@
-FROM golang:1.11-alpine AS builder
-RUN mkdir /app
-ADD . /app/
+FROM golang:1.11 AS builder
+COPY . /app
 WORKDIR /app
-# install gcc for ethereum
-RUN apk add --no-cache gcc musl-dev
-# Build the binary using go modules vendor
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -mod=vendor -o /bin/subscriber cmd/subscriber/subscriber.go
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -mod=vendor -o /bin/cron cmd/cron/cron.go
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -mod=vendor -o /bin/server cmd/server/server.go
+RUN go mod download
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /bin/subscriber cmd/subscriber/subscriber.go
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /bin/cron cmd/cron/cron.go
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /bin/server cmd/server/server.go
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
