@@ -4,7 +4,7 @@ WORKDIR /app
 RUN go mod download
 RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /bin/subscriber cmd/subscriber/subscriber.go
 RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /bin/cron cmd/cron/cron.go
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /bin/server cmd/server/server.go
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -tags=jsoniter -o /bin/server cmd/server/server.go
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
