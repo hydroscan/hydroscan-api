@@ -2,8 +2,6 @@ sudo: required
 
 stages:
   - build
-  - name: deploy
-    if: branch = master
 
 jobs:
   include:
@@ -14,5 +12,3 @@ jobs:
           - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
           - docker build -t wlchn/hydroscan-api .
           - docker push wlchn/hydroscan-api
-    - stage: deploy
-      script: echo "hello hydroscan"
