@@ -77,15 +77,16 @@ func fetchLogs(fromBlock int64, toBlock int64) {
 
 func saveEventLog(eventLog types.Log) {
 	log.Info("saveEventLog: ", eventLog.BlockNumber, eventLog.Index)
-	if eventLog.Removed {
-		log.Info("event log Removed ")
-		return
-	}
 
 	mTrade := models.Trade{}
 
 	if err := models.DB.Where("block_number = ? AND log_index = ?",
 		eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
+
+		if eventLog.Removed {
+			log.Info("Event Log Removed: ", eventLog.BlockNumber, eventLog.Index)
+			return
+		}
 
 		match := MatchEvent{}
 		err = contractABI.Unpack(&match, "Match", eventLog.Data)
@@ -130,6 +131,13 @@ func saveEventLog(eventLog types.Log) {
 
 		if err = models.DB.Where("block_number = ? AND log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
 			models.DB.Create(&mTrade)
+			log.Info("Saved Event Log: ", eventLog.BlockNumber, eventLog.Index)
+		}
+	} else {
+		if eventLog.Removed {
+			models.DB.Delete(&mTrade)
+			log.Info("Event Log Found and Removed ", eventLog.BlockNumber, eventLog.Index)
+			return
 		}
 	}
 }
