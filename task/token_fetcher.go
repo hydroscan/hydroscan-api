@@ -93,5 +93,47 @@ func GetTokenInfo(address string) TokenInfo {
 	if tokenInfo.Decimals == "" {
 		tokenInfo.Decimals = fmt.Sprint(tokenInfo.DecimalsInterface)
 	}
+	// get ETH price for WETH
+	if tokenInfo.Symbol == "WETH" {
+		lastPrice := getETHLastPrice()
+		log.Info("WETH Price: ", tokenInfo.Price)
+		log.Info("ETH Price: ", lastPrice)
+		if !lastPrice.Rate.IsZero() {
+			tokenInfo.Price = lastPrice
+		}
+	}
+
 	return tokenInfo
+}
+
+func getETHLastPrice() TokenPrice {
+	url := "http://api.ethplorer.io/getTop?apiKey=" + viper.GetString("ethplorer_apikey")
+	resp, err := http.Get(url)
+	if err != nil {
+		panic(err)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	type Result struct {
+		Tokens []struct {
+			Address string     `json:"address"`
+			Name    string     `json:"name"`
+			Symbol  string     `json:"symbol"`
+			Price   TokenPrice `json:"price"`
+		} `json:"tokens"`
+	}
+
+	result := Result{}
+	json.Unmarshal([]byte(body), &result)
+	for _, token := range result.Tokens {
+		if token.Symbol == "ETH" {
+			return token.Price
+		}
+	}
+
+	return TokenPrice{}
 }
