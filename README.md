@@ -1,6 +1,6 @@
 # HydroScan API
 
-[![Build Status](https://travis-ci.com/hydroscan/hydroscan-api.svg?branch=master)](https://travis-ci.org/hydroscan/hydroscan-api)
+[![CircleCI](https://circleci.com/gh/hydroscan/hydroscan-api.svg?style=svg)](https://circleci.com/gh/hydroscan/hydroscan-api)
 
 > The HydroScan backend built with Go. Collects data about Hydro Protocol exchanges and provides methods for a client to consume the data.
 
