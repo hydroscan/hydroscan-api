@@ -182,7 +182,7 @@ func saveEventLogV1(eventLog types.Log) {
 }
 
 func saveEventLogV1_1(eventLog types.Log) {
-	log.Info("saveEventLogV1: ", eventLog.BlockNumber, eventLog.Index)
+	log.Info("saveEventLogV1_1: ", eventLog.BlockNumber, eventLog.Index)
 
 	mTrade := models.Trade{}
 	match := MatchEventV1_1{}
