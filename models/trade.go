@@ -24,6 +24,7 @@ type Trade struct {
 	RelayerAddress     string          `gorm:"column:relayer_address;index" json:"relayerAddress"`
 	MakerAddress       string          `gorm:"column:maker_address" json:"makerAddress"`
 	TakerAddress       string          `gorm:"column:taker_address" json:"takerAddress"`
+	BuyerAddress       string          `gorm:"column:buyer_address" json:"buyerAddress"`
 	BaseTokenAmount    decimal.Decimal `gorm:"column:base_token_amount;type:decimal(32,18)" json:"baseTokenAmount"`
 	QuoteTokenAmount   decimal.Decimal `gorm:"column:quote_token_amount;type:decimal(32,18)" json:"quoteTokenAmount"`
 	MakerFee           decimal.Decimal `gorm:"column:maker_fee;type:decimal(32,18)" json:"makerFee"`
@@ -34,6 +35,7 @@ type Trade struct {
 	BaseToken          Token           `gorm:"foreignkey:base_token_address;association_foreignkey:address" json:"baseToken"`
 	QuoteToken         Token           `gorm:"foreignkey:quote_token_address;association_foreignkey:address" json:"quoteToken"`
 	Relayer            Relayer         `gorm:"foreignkey:relayer_address;association_foreignkey:address" json:"relayer"`
+	ProtocolVersion    string          `gorm:"column:protocol_version;default:'1';index" json:"protocolVersion"`
 }
 
 func (Trade) TableName() string {

@@ -14,7 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type MatchEvent struct {
+type MatchEventV1 struct {
 	BaseToken        common.Address
 	QuoteToken       common.Address
 	Relayer          common.Address
@@ -27,6 +27,30 @@ type MatchEvent struct {
 	MakerGasFee      *big.Int
 	MakerRebate      *big.Int
 	TakerGasFee      *big.Int
+}
+
+type OrderAddressSet struct {
+	BaseToken  common.Address
+	QuoteToken common.Address
+	Relayer    common.Address
+}
+
+type MatchResult struct {
+	Maker                  common.Address
+	Taker                  common.Address
+	Buyer                  common.Address
+	MakerFee               *big.Int
+	MakerRebate            *big.Int
+	TakerFee               *big.Int
+	MakerGasFee            *big.Int
+	TakerGasFee            *big.Int
+	BaseTokenFilledAmount  *big.Int
+	QuoteTokenFilledAmount *big.Int
+}
+
+type MatchEventV1_1 struct {
+	AddressSet OrderAddressSet
+	Result     MatchResult
 }
 
 func FetchHistoricalLogs() {
@@ -56,12 +80,14 @@ func FetchHistoricalLogs() {
 func fetchLogs(fromBlock int64, toBlock int64) {
 	log.Info("fetchLogs: ", fromBlock, " - ", toBlock)
 
-	contractAddress := common.HexToAddress(HydroExchangeAddress)
+	contractAddressV1 := common.HexToAddress(HydroExchangeAddressV1)
+	contractAddressV1_1 := common.HexToAddress(HydroExchangeAddressV1_1)
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(fromBlock),
 		ToBlock:   big.NewInt(toBlock),
 		Addresses: []common.Address{
-			contractAddress,
+			contractAddressV1,
+			contractAddressV1_1,
 		},
 	}
 
@@ -88,51 +114,12 @@ func saveEventLog(eventLog types.Log) {
 			return
 		}
 
-		match := MatchEvent{}
-		err = contractABI.Unpack(&match, "Match", eventLog.Data)
-		if err != nil {
-			log.Warn(err)
-			return
+		if eventLog.BlockNumber >= HydroStartBlockNumberV1_1 {
+			saveEventLogV1_1(eventLog)
+		} else {
+			saveEventLogV1(eventLog)
 		}
 
-		baseToken := GetToken(match.BaseToken.Hex())
-		quoteToken := GetToken(match.QuoteToken.Hex())
-		blockTime := getBlockTime(eventLog.BlockNumber)
-
-		quoteTokenAmount := decimal.NewFromBigInt(match.QuoteTokenAmount, int32(-quoteToken.Decimals))
-		quoteTokenPriceUSD := quoteToken.PriceUSD
-		date := time.Unix(int64(blockTime), 0)
-		// if duration is too long unset price now. fetch history price later.
-		if time.Now().Sub(date) > time.Hour {
-			quoteTokenPriceUSD = decimal.New(0, 0)
-		}
-
-		mTrade = models.Trade{
-			BlockNumber:        eventLog.BlockNumber,
-			BlockHash:          eventLog.BlockHash.Hex(),
-			TransactionHash:    eventLog.TxHash.Hex(),
-			LogIndex:           eventLog.Index,
-			Date:               date,
-			QuoteTokenPriceUSD: quoteTokenPriceUSD,
-			VolumeUSD:          quoteTokenPriceUSD.Mul(quoteTokenAmount),
-			BaseTokenAddress:   baseToken.Address,
-			QuoteTokenAddress:  quoteToken.Address,
-			RelayerAddress:     match.Relayer.Hex(),
-			MakerAddress:       match.Maker.Hex(),
-			TakerAddress:       match.Taker.Hex(),
-			BaseTokenAmount:    decimal.NewFromBigInt(match.BaseTokenAmount, int32(-baseToken.Decimals)),
-			QuoteTokenAmount:   quoteTokenAmount,
-			MakerFee:           decimal.NewFromBigInt(match.MakerFee, int32(-quoteToken.Decimals)),
-			TakerFee:           decimal.NewFromBigInt(match.TakerFee, int32(-quoteToken.Decimals)),
-			MakerGasFee:        decimal.NewFromBigInt(match.MakerGasFee, int32(-quoteToken.Decimals)),
-			MakerRebate:        decimal.NewFromBigInt(match.MakerRebate, int32(-quoteToken.Decimals)),
-			TakerGasFee:        decimal.NewFromBigInt(match.TakerGasFee, int32(-quoteToken.Decimals)),
-		}
-
-		if err = models.DB.Where("block_number = ? AND log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
-			models.DB.Create(&mTrade)
-			log.Info("Saved Event Log: ", eventLog.BlockNumber, eventLog.Index)
-		}
 	} else {
 		if eventLog.Removed {
 			models.DB.Delete(&mTrade)
@@ -142,11 +129,116 @@ func saveEventLog(eventLog types.Log) {
 	}
 }
 
+func saveEventLogV1(eventLog types.Log) {
+	log.Info("saveEventLogV1: ", eventLog.BlockNumber, eventLog.Index)
+
+	mTrade := models.Trade{}
+	match := MatchEventV1{}
+	err = contractABIV1.Unpack(&match, "Match", eventLog.Data)
+	if err != nil {
+		log.Warn(err)
+		return
+	}
+
+	baseToken := GetToken(match.BaseToken.Hex())
+	quoteToken := GetToken(match.QuoteToken.Hex())
+	blockTime := getBlockTime(eventLog.BlockNumber)
+
+	quoteTokenAmount := decimal.NewFromBigInt(match.QuoteTokenAmount, int32(-quoteToken.Decimals))
+	quoteTokenPriceUSD := quoteToken.PriceUSD
+	date := time.Unix(int64(blockTime), 0)
+	// if duration is too long unset price now. fetch history price later.
+	if time.Now().Sub(date) > time.Hour {
+		quoteTokenPriceUSD = decimal.New(0, 0)
+	}
+
+	mTrade = models.Trade{
+		BlockNumber:        eventLog.BlockNumber,
+		BlockHash:          eventLog.BlockHash.Hex(),
+		TransactionHash:    eventLog.TxHash.Hex(),
+		LogIndex:           eventLog.Index,
+		Date:               date,
+		QuoteTokenPriceUSD: quoteTokenPriceUSD,
+		VolumeUSD:          quoteTokenPriceUSD.Mul(quoteTokenAmount),
+		BaseTokenAddress:   baseToken.Address,
+		QuoteTokenAddress:  quoteToken.Address,
+		RelayerAddress:     match.Relayer.Hex(),
+		MakerAddress:       match.Maker.Hex(),
+		TakerAddress:       match.Taker.Hex(),
+		BaseTokenAmount:    decimal.NewFromBigInt(match.BaseTokenAmount, int32(-baseToken.Decimals)),
+		QuoteTokenAmount:   quoteTokenAmount,
+		MakerFee:           decimal.NewFromBigInt(match.MakerFee, int32(-quoteToken.Decimals)),
+		TakerFee:           decimal.NewFromBigInt(match.TakerFee, int32(-quoteToken.Decimals)),
+		MakerGasFee:        decimal.NewFromBigInt(match.MakerGasFee, int32(-quoteToken.Decimals)),
+		MakerRebate:        decimal.NewFromBigInt(match.MakerRebate, int32(-quoteToken.Decimals)),
+		TakerGasFee:        decimal.NewFromBigInt(match.TakerGasFee, int32(-quoteToken.Decimals)),
+		ProtocolVersion:    ProtocolV1,
+	}
+
+	if err = models.DB.Where("block_number = ? AND log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
+		models.DB.Create(&mTrade)
+		log.Info("Saved Event Log: ", eventLog.BlockNumber, eventLog.Index)
+	}
+}
+
+func saveEventLogV1_1(eventLog types.Log) {
+	log.Info("saveEventLogV1: ", eventLog.BlockNumber, eventLog.Index)
+
+	mTrade := models.Trade{}
+	match := MatchEventV1_1{}
+	err = contractABIV1_1.Unpack(&match, "Match", eventLog.Data)
+	if err != nil {
+		log.Warn(err)
+		return
+	}
+
+	baseToken := GetToken(match.AddressSet.BaseToken.Hex())
+	quoteToken := GetToken(match.AddressSet.QuoteToken.Hex())
+	blockTime := getBlockTime(eventLog.BlockNumber)
+
+	quoteTokenAmount := decimal.NewFromBigInt(match.Result.QuoteTokenFilledAmount, int32(-quoteToken.Decimals))
+	quoteTokenPriceUSD := quoteToken.PriceUSD
+	date := time.Unix(int64(blockTime), 0)
+	// if duration is too long unset price now. fetch history price later.
+	if time.Now().Sub(date) > time.Hour {
+		quoteTokenPriceUSD = decimal.New(0, 0)
+	}
+
+	mTrade = models.Trade{
+		BlockNumber:        eventLog.BlockNumber,
+		BlockHash:          eventLog.BlockHash.Hex(),
+		TransactionHash:    eventLog.TxHash.Hex(),
+		LogIndex:           eventLog.Index,
+		Date:               date,
+		QuoteTokenPriceUSD: quoteTokenPriceUSD,
+		VolumeUSD:          quoteTokenPriceUSD.Mul(quoteTokenAmount),
+		BaseTokenAddress:   baseToken.Address,
+		QuoteTokenAddress:  quoteToken.Address,
+		RelayerAddress:     match.AddressSet.Relayer.Hex(),
+		MakerAddress:       match.Result.Maker.Hex(),
+		TakerAddress:       match.Result.Taker.Hex(),
+		BuyerAddress:       match.Result.Buyer.Hex(),
+		BaseTokenAmount:    decimal.NewFromBigInt(match.Result.BaseTokenFilledAmount, int32(-baseToken.Decimals)),
+		QuoteTokenAmount:   quoteTokenAmount,
+		MakerFee:           decimal.NewFromBigInt(match.Result.MakerFee, int32(-quoteToken.Decimals)),
+		TakerFee:           decimal.NewFromBigInt(match.Result.TakerFee, int32(-quoteToken.Decimals)),
+		MakerGasFee:        decimal.NewFromBigInt(match.Result.MakerGasFee, int32(-quoteToken.Decimals)),
+		MakerRebate:        decimal.NewFromBigInt(match.Result.MakerRebate, int32(-quoteToken.Decimals)),
+		TakerGasFee:        decimal.NewFromBigInt(match.Result.TakerGasFee, int32(-quoteToken.Decimals)),
+		ProtocolVersion:    ProtocolV1_1,
+	}
+
+	if err = models.DB.Where("block_number = ? AND log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
+		models.DB.Create(&mTrade)
+		log.Info("Saved Event Log: ", eventLog.BlockNumber, eventLog.Index)
+	}
+}
+
 func getFromBlockNumber() uint64 {
 	var number uint64
 	mTrade := models.Trade{}
 	if err := models.DB.Order("block_number desc").Take(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
-		number = uint64(HydroStartBlockNumber)
+		number = uint64(HydroStartBlockNumberV1)
 	} else {
 		number = mTrade.BlockNumber
 	}

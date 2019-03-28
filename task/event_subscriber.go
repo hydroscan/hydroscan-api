@@ -32,7 +32,7 @@ func SubscribeLogs() {
 		panic(err)
 	}
 
-	contractAddress := common.HexToAddress(HydroExchangeAddress)
+	contractAddress := common.HexToAddress(HydroExchangeAddressV1_1)
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{contractAddress},
 	}
