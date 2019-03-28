@@ -72,7 +72,7 @@ func getTokensDefault(page int, pageSize int, offset int, filter string) TokensR
 	models.DB.Raw("SELECT * FROM tokens ORDER BY "+orderField+" DESC LIMIT ? OFFSET ?", pageSize, offset).Scan(&tokens)
 
 	for i, _ := range tokens {
-		tradesData := task.GetTrades24hData(tokens[i].Address)
+		tradesData := task.GetTokenTrades24hData(tokens[i].Address)
 		tokens[i].Traders24h = tradesData.Traders24h
 		tokens[i].Amount24h = tradesData.Amount24h
 	}
@@ -91,7 +91,7 @@ func getTokensByKeyword(page int, pageSize int, offset int, keyword string) Toke
 		"%"+keyword+"%", "%"+keyword+"%", pageSize, offset).Scan(&tokens)
 
 	for i, _ := range tokens {
-		tradesData := task.GetTrades24hData(tokens[i].Address)
+		tradesData := task.GetTokenTrades24hData(tokens[i].Address)
 		tokens[i].Traders24h = tradesData.Traders24h
 		tokens[i].Amount24h = tradesData.Amount24h
 	}
