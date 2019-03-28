@@ -27,16 +27,16 @@ func GetRelayer(c *gin.Context) {
 	slug := c.Params.ByName("slug")
 	relayer := models.Relayer{}
 
-	statment := models.DB.Where("slug = ?", slug)
+	statement := models.DB.Where("slug = ?", slug)
 	if utils.IsAddress(slug) {
 		if isTrue, key := utils.IsRelayer(slug); isTrue {
-			statment = models.DB.Where("address = ?", key)
+			statement = models.DB.Where("address = ?", key)
 		} else {
 			c.JSON(404, relayer)
 		}
 	}
 
-	if err := statment.First(&relayer).Error; gorm.IsRecordNotFoundError(err) {
+	if err := statement.First(&relayer).Error; gorm.IsRecordNotFoundError(err) {
 		c.JSON(404, relayer)
 	} else {
 		res := getRelayerService(relayer)

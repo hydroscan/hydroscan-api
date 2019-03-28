@@ -75,7 +75,7 @@ func SubscribeLogs() {
 			log.Info("subscribed")
 
 		case eventLog := <-eventLogs:
-			log.Info("recieve log: ", eventLog.BlockNumber, eventLog.Index)
+			log.Info("receive log: ", eventLog.BlockNumber, eventLog.Index)
 			checkMissingBlocks(eventLog.BlockNumber)
 			saveEventLog(eventLog)
 

@@ -1,6 +1,7 @@
 # HydroScan API
 
 [![CircleCI](https://circleci.com/gh/hydroscan/hydroscan-api.svg?style=svg)](https://circleci.com/gh/hydroscan/hydroscan-api)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hydroscan/hydroscan-api)](https://goreportcard.com/report/github.com/hydroscan/hydroscan-api)
 
 > The HydroScan backend built with Go. Collects data about Hydro Protocol exchanges and provides methods for a client to consume the data.
 

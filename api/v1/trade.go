@@ -20,17 +20,17 @@ func GetTrades(c *gin.Context) {
 	offset := (page - 1) * pageSize
 
 	var trades []models.Trade
-	statment := models.DB.Table("trades").Order("block_number desc").Order("log_index desc")
+	statement := models.DB.Table("trades").Order("block_number desc").Order("log_index desc")
 	if query.Transaction != "" {
-		statment = statment.Where("transaction_hash = ?", query.Transaction)
+		statement = statement.Where("transaction_hash = ?", query.Transaction)
 	} else if query.BaseTokenAddress != "" && query.QuoteTokenAddress != "" {
-		statment = statment.Where("base_token_address = ? AND quote_token_address = ?", query.BaseTokenAddress, query.QuoteTokenAddress)
+		statement = statement.Where("base_token_address = ? AND quote_token_address = ?", query.BaseTokenAddress, query.QuoteTokenAddress)
 	} else if query.TokenAddress != "" {
-		statment = statment.Where("base_token_address = ? OR quote_token_address = ?", query.TokenAddress, query.TokenAddress)
+		statement = statement.Where("base_token_address = ? OR quote_token_address = ?", query.TokenAddress, query.TokenAddress)
 	} else if query.TraderAddress != "" {
-		statment = statment.Where("maker_address = ? OR taker_address = ?", query.TraderAddress, query.TraderAddress)
+		statement = statement.Where("maker_address = ? OR taker_address = ?", query.TraderAddress, query.TraderAddress)
 	} else if query.RelayerAddress != "" {
-		statment = statment.Where("relayer_address = ?", query.RelayerAddress)
+		statement = statement.Where("relayer_address = ?", query.RelayerAddress)
 	}
 
 	type resType struct {
@@ -39,12 +39,12 @@ func GetTrades(c *gin.Context) {
 		Count    uint64         `json:"count"`
 		Trades   []models.Trade `json:"trades"`
 	}
-	if err := statment.Offset(offset).Limit(pageSize).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").Find(&trades).Error; gorm.IsRecordNotFoundError(err) {
+	if err := statement.Offset(offset).Limit(pageSize).Preload("Relayer").Preload("BaseToken").Preload("QuoteToken").Find(&trades).Error; gorm.IsRecordNotFoundError(err) {
 		res := resType{page, pageSize, 0, trades}
 		c.JSON(404, res)
 	} else {
 		res := resType{page, pageSize, 0, trades}
-		statment.Count(&res.Count)
+		statement.Count(&res.Count)
 
 		c.JSON(200, res)
 	}
