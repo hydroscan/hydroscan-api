@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/hydroscan/hydroscan-api/models"
-	// log "github.com/sirupsen/logrus"
 )
 
 func IsAddress(str string) (ret bool) {

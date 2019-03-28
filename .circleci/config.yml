@@ -4,12 +4,12 @@ jobs:
     branches:
       only:
         - master
-    machine: true
+    docker:
+      - image: circleci/go:1.11
     steps:
       - checkout
       - run:
-          name: Docker Build
+          name: run test
           command: |
-            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-            docker build -t wlchn/hydroscan-api .
-            docker push wlchn/hydroscan-api
+            go mod download
+            go test ./... -cover
