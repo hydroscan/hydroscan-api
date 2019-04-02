@@ -31,11 +31,6 @@ func main() {
 	redis.Connect()
 	task.InitEthClient()
 
-	// correct historical data once
-	go func() {
-		task.FetchHistoricalLogs(true)
-	}()
-
 	log.Info("cron running")
 
 	gocron.Every(1).Minute().Do(safeTask(task.FetchRecentLogs))
