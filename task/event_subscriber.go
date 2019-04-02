@@ -14,7 +14,7 @@ import (
 )
 
 func SubscribeLogs() {
-	FetchHistoricalLogs()
+	FetchHistoricalLogs(false)
 
 	var client *ethclient.Client
 	var err error

@@ -53,9 +53,14 @@ type MatchEventV1_1 struct {
 	Result     MatchResult
 }
 
-func FetchHistoricalLogs() {
+func FetchHistoricalLogs(fetchAll bool) {
 	log.Info("FetchHistoricalLogs")
 	fromBlock := getFromBlockNumber()
+
+	if fetchAll {
+		fromBlock = HydroStartBlockNumberV1
+	}
+
 	lastBlock := getLastBlockNumber()
 
 	if fromBlock > lastBlock {
@@ -75,6 +80,11 @@ func FetchHistoricalLogs() {
 	}
 
 	UpdateHistoryTradePrice()
+}
+
+func FetchRecentLogs() {
+	lastBlock := getLastBlockNumber()
+	fetchLogs(int64(lastBlock-100), int64(lastBlock))
 }
 
 func fetchLogs(fromBlock int64, toBlock int64) {
