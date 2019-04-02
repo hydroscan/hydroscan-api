@@ -44,7 +44,7 @@ func GetTrades(c *gin.Context) {
 		c.JSON(404, res)
 	} else {
 		res := resType{page, pageSize, 0, trades}
-		statement.Count(&res.Count)
+		statement.Where("deleted_at IS NULL").Count(&res.Count)
 
 		c.JSON(200, res)
 	}
