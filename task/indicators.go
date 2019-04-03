@@ -19,6 +19,7 @@ type Indicators struct {
 	Volume          decimal.Decimal `json:"volume"`
 	Trades          decimal.Decimal `json:"trades"`
 	Traders         decimal.Decimal `json:"traders"`
+	Timestamp       int64           `json:"timestamp"`
 }
 
 func UpdateIndicators() {
@@ -36,7 +37,10 @@ func UpdateIndicators() {
 	models.DB.Raw("SELECT count(*) AS trades FROM trades").Scan(&indicators)
 	models.DB.Raw("SELECT count(*) AS traders FROM (SELECT maker_address FROM trades UNION SELECT taker_address FROM trades ) AS traders").Scan(&indicators)
 
+	t := time.Now()
+	indicators.Timestamp = t.Unix()
 	log.Info(indicators)
+
 	b, err := json.Marshal(indicators)
 	if err != nil {
 		panic(err)
