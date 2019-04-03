@@ -16,6 +16,9 @@ type Indicators struct {
 	Trades24h       decimal.Decimal `json:"trades24h"`
 	Traders24h      decimal.Decimal `json:"traders24h"`
 	MarketRabate24h decimal.Decimal `json:"marketRabate24h"`
+	Volume          decimal.Decimal `json:"volume"`
+	Trades          decimal.Decimal `json:"trades"`
+	Traders         decimal.Decimal `json:"traders"`
 }
 
 func UpdateIndicators() {
@@ -28,6 +31,11 @@ func UpdateIndicators() {
 	models.DB.Raw("SELECT count(*) AS traders24h FROM (SELECT maker_address FROM trades WHERE date > ? UNION SELECT taker_address FROM trades WHERE date > ? ) AS traders",
 		time24hAgo, time24hAgo).Scan(&indicators)
 	models.DB.Raw("SELECT sum(maker_rebate) AS market_rabate24h FROM trades WHERE date > ?", time24hAgo).Scan(&indicators)
+
+	models.DB.Raw("SELECT sum(volume_usd) AS volume FROM trades").Scan(&indicators)
+	models.DB.Raw("SELECT count(*) AS trades FROM trades").Scan(&indicators)
+	models.DB.Raw("SELECT count(*) AS traders FROM (SELECT maker_address FROM trades UNION SELECT taker_address FROM trades ) AS traders").Scan(&indicators)
+
 	log.Info(indicators)
 	b, err := json.Marshal(indicators)
 	if err != nil {
