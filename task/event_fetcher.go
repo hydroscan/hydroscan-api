@@ -58,7 +58,8 @@ func FetchHistoricalLogs(fetchAll bool) {
 	fromBlock := getFromBlockNumber()
 
 	if fetchAll {
-		fromBlock = HydroStartBlockNumberV1
+		// fromBlock = HydroStartBlockNumberV1
+		fromBlock = HydroStartBlockNumberV1_1
 	}
 
 	lastBlock := getLastBlockNumber()
@@ -83,8 +84,12 @@ func FetchHistoricalLogs(fetchAll bool) {
 }
 
 func FetchRecentLogs() {
+	fromBlock := getFromBlockNumber()
 	lastBlock := getLastBlockNumber()
-	fetchLogs(int64(lastBlock-100), int64(lastBlock))
+	if lastBlock-100 < fromBlock {
+		fromBlock = lastBlock - 100
+	}
+	fetchLogs(int64(fromBlock), int64(lastBlock))
 }
 
 func fetchLogs(fromBlock int64, toBlock int64) {
