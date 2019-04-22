@@ -43,6 +43,19 @@ func UpdateRelayers() {
 	}
 }
 
+func CreateRelayerByAddressIfNotExist(address string) {
+	mRelayer := models.Relayer{}
+	if err := models.DB.Where("address = ?", address).First(&mRelayer).Error; gorm.IsRecordNotFoundError(err) {
+		mRelayer = models.Relayer{
+			Address: address,
+			Url:     "https://etherscan.io/address/" + address,
+			Name:    "Relayer-" + address[0:6] + "..." + address[len(address)-4:], // like Relayer-0x4949...33FD
+			Slug:    address,
+		}
+		models.DB.Create(&mRelayer)
+	}
+}
+
 func getRelayers() []RelayerInfo {
 	jsonFile, err := os.Open(ResourcePath + "/relayers.json")
 	if err != nil {

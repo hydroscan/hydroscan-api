@@ -4,5 +4,11 @@
     "slug": "ddex",
     "url": "https://ddex.io",
     "address": "0x49497a4D914ae91D34Ce80030fE620687Bf333FD"
+  },
+  {
+    "name": "Cent",
+    "slug": "cent",
+    "url": "https://www.cent.vc",
+    "address": "0xdD94B4B8BB7c94CAb388354BB36A0838b48A633C"
   }
 ]

@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// subscriber is deprecated
 func SubscribeLogs() {
 	FetchHistoricalLogs(false)
 

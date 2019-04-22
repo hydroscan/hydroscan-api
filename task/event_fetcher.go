@@ -86,6 +86,7 @@ func FetchHistoricalLogs(fetchAll bool) {
 func FetchRecentLogs() {
 	fromBlock := getFromBlockNumber()
 	lastBlock := getLastBlockNumber()
+
 	if lastBlock-100 < fromBlock {
 		fromBlock = lastBlock - 100
 	}
@@ -129,12 +130,12 @@ func saveEventLog(eventLog types.Log) {
 			return
 		}
 
-		if eventLog.BlockNumber >= HydroStartBlockNumberV1_1 {
-			saveEventLogV1_1(eventLog)
-		} else {
+		switch eventLog.Address.Hex() {
+		case HydroExchangeAddressV1:
 			saveEventLogV1(eventLog)
+		case HydroExchangeAddressV1_1:
+			saveEventLogV1_1(eventLog)
 		}
-
 	} else {
 		if eventLog.Removed {
 			models.DB.Delete(&mTrade)
@@ -192,6 +193,7 @@ func saveEventLogV1(eventLog types.Log) {
 
 	if err = models.DB.Where("block_number = ? AND log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
 		models.DB.Create(&mTrade)
+		CreateRelayerByAddressIfNotExist(mTrade.RelayerAddress)
 		log.Info("Saved Event Log: ", eventLog.BlockNumber, eventLog.Index)
 	}
 }
@@ -245,6 +247,7 @@ func saveEventLogV1_1(eventLog types.Log) {
 
 	if err = models.DB.Where("block_number = ? AND log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
 		models.DB.Create(&mTrade)
+		CreateRelayerByAddressIfNotExist(mTrade.RelayerAddress)
 		log.Info("Saved Event Log: ", eventLog.BlockNumber, eventLog.Index)
 	}
 }

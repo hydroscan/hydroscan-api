@@ -31,10 +31,10 @@ func main() {
 	redis.Connect()
 	task.InitEthClient()
 
-	// // correct historical data once
-	// go func() {
-	// 	task.FetchHistoricalLogs(true)
-	// }()
+	// correct historical data once
+	go func() {
+		task.FetchHistoricalLogs(true)
+	}()
 
 	log.Info("cron running")
 

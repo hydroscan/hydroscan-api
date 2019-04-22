@@ -19,6 +19,7 @@ func subscribeRetryWrapper() {
 	task.SubscribeLogs()
 }
 
+// subscriber is deprecated
 func main() {
 	config.Load()
 

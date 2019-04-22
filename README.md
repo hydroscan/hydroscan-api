@@ -10,10 +10,6 @@
 
 ## Components
 
-### Subscriber
-
-Subscribes to Hydro Protocol related event logs on the blockchain for up to date trade information.
-
 ### Cron
 
 A scheduler to pull a variety of data about running Exchanges, including current token price, trade volume, etc.
@@ -48,12 +44,6 @@ It means you have cloned the repo inside GOPATH. To solve this, you can try clon
 
 ```
 $ export GO111MODULE=on    # manually active module mode
-```
-
-### Run Subscriber
-
-```
-go run ./cmd/subscriber/subscriber.go
 ```
 
 ### Run Cron
