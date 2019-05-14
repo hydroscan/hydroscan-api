@@ -91,6 +91,11 @@ func UpdateTokenPrices() {
 }
 
 func GetTokenInfo(address string) TokenInfo {
+	// old TUSD
+	if address == "0x8dd5fbCe2F6a956C3022bA3663759011Dd51e73E" {
+		// TUSD
+		address = "0x0000000000085d4780B73119b644AE5ecd22b376"
+	}
 	log.Info("GetTokenInfo ", address)
 	url := "http://api.ethplorer.io/getTokenInfo/" + address + "?apiKey=" + viper.GetString("ethplorer_apikey")
 	resp, err := http.Get(url)
