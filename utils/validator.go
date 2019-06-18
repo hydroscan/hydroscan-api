@@ -41,7 +41,7 @@ func IsToken(address string) (bool, string) {
 func IsTrader(address string) (bool, string) {
 	address = strings.ToLower(address)
 	trade := models.Trade{}
-	if err := models.DB.Where("LOWER(maker_address) = ? OR taker_address = ?", address, address).First(&trade).Error; err != nil {
+	if err := models.DB.Where("LOWER(maker_address) = ? OR LOWER(taker_address) = ?", address, address).First(&trade).Error; err != nil {
 		return false, ""
 	}
 	if strings.ToLower(trade.MakerAddress) == address {
