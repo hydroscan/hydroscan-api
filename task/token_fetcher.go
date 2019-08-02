@@ -57,6 +57,11 @@ func GetToken(address string) models.Token {
 			mToken.Name = "Evolution Land Global Token"
 			mToken.Symbol = "RING"
 		}
+		// https://etherscan.io/token/0xeb269732ab75a6fd61ea60b06fe994cd32a83549#readContract
+		if address == "0xeb269732ab75a6fd61ea60b06fe994cd32a83549" {
+			mToken.Name = "dForce"
+			mToken.Symbol = "USDx"
+		}
 
 		models.DB.Create(&mToken)
 	}
@@ -78,7 +83,11 @@ func UpdateTokenPrices() {
 			tokenInfo.Name = "Evolution Land Global Token"
 			tokenInfo.Symbol = "RING"
 		}
-
+		// https://etherscan.io/token/0xeb269732ab75a6fd61ea60b06fe994cd32a83549#readContract
+		if mToken.Address == "0xeb269732ab75a6fd61ea60b06fe994cd32a83549" {
+			mToken.Name = "dForce"
+			mToken.Symbol = "USDx"
+		}
 		models.DB.Model(&mToken).Updates(models.Token{
 			Name:           tokenInfo.Name,
 			Symbol:         tokenInfo.Symbol,
