@@ -52,7 +52,7 @@ $ export GO111MODULE=on    # manually active module mode
 go run ./cmd/cron/cron.go
 ```
 
-### Run API server
+### Run API Server
 
 ```
 go run ./cmd/server/server.go    # Started on port 8080 by default
