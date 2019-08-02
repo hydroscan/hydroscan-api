@@ -89,13 +89,13 @@ func UpdateTokenPrices() {
 		}
 		// https://etherscan.io/token/0xeb269732ab75A6fD61Ea60b06fE994cD32a83549#readContract
 		if mToken.Address == "0xeb269732ab75A6fD61Ea60b06fE994cD32a83549" {
-			mToken.Name = "USDx"
-			mToken.Symbol = "USDx"
+			tokenInfo.Name = "USDx"
+			tokenInfo.Symbol = "USDx"
 		}
 		// https://etherscan.io/token/0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0#readContract
 		if mToken.Address == "0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0" {
-			mToken.Name = "dForce"
-			mToken.Symbol = "DF"
+			tokenInfo.Name = "dForce"
+			tokenInfo.Symbol = "DF"
 		}
 		models.DB.Model(&mToken).Updates(models.Token{
 			Name:           tokenInfo.Name,
