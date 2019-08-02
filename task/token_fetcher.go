@@ -62,7 +62,11 @@ func GetToken(address string) models.Token {
 			mToken.Name = "USDx"
 			mToken.Symbol = "USDx"
 		}
-
+		// https://etherscan.io/token/0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0#readContract
+		if address == "0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0" {
+			mToken.Name = "dForce"
+			mToken.Symbol = "DF"
+		}
 		models.DB.Create(&mToken)
 	}
 	return mToken
@@ -87,6 +91,11 @@ func UpdateTokenPrices() {
 		if mToken.Address == "0xeb269732ab75a6fd61ea60b06fe994cd32a83549" {
 			mToken.Name = "USDx"
 			mToken.Symbol = "USDx"
+		}
+		// https://etherscan.io/token/0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0#readContract
+		if mToken.Address == "0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0" {
+			mToken.Name = "dForce"
+			mToken.Symbol = "DF"
 		}
 		models.DB.Model(&mToken).Updates(models.Token{
 			Name:           tokenInfo.Name,
