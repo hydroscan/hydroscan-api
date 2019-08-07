@@ -51,7 +51,7 @@ func GetToken(address string) models.Token {
 			PriceUpdatedAt: time.Unix(tokenInfo.Price.TS, 0),
 		}
 
-		// hacked for RING, can't get name and symbol
+		// Some tokens' name and symbol are bytes
 		// https://etherscan.io/token/0x9469d013805bffb7d3debe5e7839237e535ec483#readContract
 		if address == "0x9469D013805bFfB7D3DEBe5E7839237e535ec483" {
 			mToken.Name = "Evolution Land Global Token"
@@ -66,6 +66,11 @@ func GetToken(address string) models.Token {
 		if address == "0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0" {
 			mToken.Name = "dForce"
 			mToken.Symbol = "DF"
+		}
+		// https://etherscan.io/token/0x2630997aAB62fA1030a8b975e1AA2dC573b18a13#readContract
+		if address == "0x2630997aAB62fA1030a8b975e1AA2dC573b18a13" {
+			mToken.Name = "HYPE Token"
+			mToken.Symbol = "HYPE"
 		}
 		models.DB.Create(&mToken)
 	}
@@ -96,6 +101,11 @@ func UpdateTokenPrices() {
 		if mToken.Address == "0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0" {
 			tokenInfo.Name = "dForce"
 			tokenInfo.Symbol = "DF"
+		}
+		// https://etherscan.io/token/0x2630997aAB62fA1030a8b975e1AA2dC573b18a13#readContract
+		if mToken.Address == "0x2630997aAB62fA1030a8b975e1AA2dC573b18a13" {
+			tokenInfo.Name = "HYPE Token"
+			tokenInfo.Symbol = "HYPE"
 		}
 		models.DB.Model(&mToken).Updates(models.Token{
 			Name:           tokenInfo.Name,
