@@ -51,27 +51,6 @@ func GetToken(address string) models.Token {
 			PriceUpdatedAt: time.Unix(tokenInfo.Price.TS, 0),
 		}
 
-		// Some tokens' name and symbol are bytes
-		// https://etherscan.io/token/0x9469d013805bffb7d3debe5e7839237e535ec483#readContract
-		if address == "0x9469D013805bFfB7D3DEBe5E7839237e535ec483" {
-			mToken.Name = "Evolution Land Global Token"
-			mToken.Symbol = "RING"
-		}
-		// https://etherscan.io/token/0xeb269732ab75A6fD61Ea60b06fE994cD32a83549#readContract
-		if address == "0xeb269732ab75A6fD61Ea60b06fE994cD32a83549" {
-			mToken.Name = "USDx"
-			mToken.Symbol = "USDx"
-		}
-		// https://etherscan.io/token/0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0#readContract
-		if address == "0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0" {
-			mToken.Name = "dForce"
-			mToken.Symbol = "DF"
-		}
-		// https://etherscan.io/token/0x2630997aAB62fA1030a8b975e1AA2dC573b18a13#readContract
-		if address == "0x2630997aAB62fA1030a8b975e1AA2dC573b18a13" {
-			mToken.Name = "HYPE Token"
-			mToken.Symbol = "HYPE"
-		}
 		models.DB.Create(&mToken)
 	}
 	return mToken
