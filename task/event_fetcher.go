@@ -59,7 +59,8 @@ func FetchHistoricalLogs(fetchAll bool) {
 
 	if fetchAll {
 		// fromBlock = HydroStartBlockNumberV1
-		fromBlock = HydroStartBlockNumberV1_1
+		//fromBlock = HydroStartBlockNumberV1_1
+		fromBlock = HydroStartBlockNumberV1_2
 	}
 
 	lastBlock := getLastBlockNumber()
@@ -98,12 +99,14 @@ func fetchLogs(fromBlock int64, toBlock int64) {
 
 	contractAddressV1 := common.HexToAddress(HydroExchangeAddressV1)
 	contractAddressV1_1 := common.HexToAddress(HydroExchangeAddressV1_1)
+	contractAddressV1_2 := common.HexToAddress(HydroExchangeAddressV1_2)
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(fromBlock),
 		ToBlock:   big.NewInt(toBlock),
 		Addresses: []common.Address{
 			contractAddressV1,
 			contractAddressV1_1,
+			contractAddressV1_2,
 		},
 	}
 
@@ -134,6 +137,10 @@ func saveEventLog(eventLog types.Log) {
 		case HydroExchangeAddressV1:
 			saveEventLogV1(eventLog)
 		case HydroExchangeAddressV1_1:
+			log.Info("saveEventLogV1_1: ", eventLog.BlockNumber, eventLog.Index)
+			saveEventLogV1_1(eventLog)
+		case HydroExchangeAddressV1_2:
+			log.Info("saveEventLogV1_2: ", eventLog.BlockNumber, eventLog.Index)
 			saveEventLogV1_1(eventLog)
 		}
 	} else {
@@ -199,8 +206,7 @@ func saveEventLogV1(eventLog types.Log) {
 }
 
 func saveEventLogV1_1(eventLog types.Log) {
-	log.Info("saveEventLogV1_1: ", eventLog.BlockNumber, eventLog.Index)
-
+	//log.Info("saveEventLogV1_1: ", eventLog.BlockNumber, eventLog.Index)
 	mTrade := models.Trade{}
 	match := MatchEventV1_1{}
 	err = contractABIV1_1.Unpack(&match, "Match", eventLog.Data)

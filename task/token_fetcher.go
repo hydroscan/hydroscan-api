@@ -103,26 +103,33 @@ func GetTokenInfo(address string) TokenInfo {
 		// TUSD
 		address = "0x0000000000085d4780B73119b644AE5ecd22b376"
 	}
-	log.Info("GetTokenInfo ", address)
-	url := "http://api.ethplorer.io/getTokenInfo/" + address + "?apiKey=" + viper.GetString("ethplorer_apikey")
-	resp, err := http.Get(url)
-	if err != nil {
-		panic(err)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-
 	tokenInfo := TokenInfo{}
-	json.Unmarshal([]byte(body), &tokenInfo)
+
+	if address == "0x000000000000000000000000000000000000000E" {
+		tokenInfo.Symbol = "ETH"
+		tokenInfo.Name = "Ether"
+		tokenInfo.Decimals = "18"
+	} else {
+		log.Info("GetTokenInfo ", address)
+		url := "http://api.ethplorer.io/getTokenInfo/" + address + "?apiKey=" + viper.GetString("ethplorer_apikey")
+		resp, err := http.Get(url)
+		if err != nil {
+			panic(err)
+		}
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+		json.Unmarshal([]byte(body), &tokenInfo)
+	}
+
 	// ethplorer api return decimals type can be string or number
 	if tokenInfo.Decimals == "" {
 		tokenInfo.Decimals = fmt.Sprint(tokenInfo.DecimalsInterface)
 	}
 	// get ETH price for WETH
-	if tokenInfo.Symbol == "WETH" {
+	if tokenInfo.Symbol == "WETH" || tokenInfo.Symbol == "ETH" {
 		lastPrice := getETHLastPrice()
 		log.Info("WETH Price: ", tokenInfo.Price)
 		log.Info("ETH Price: ", lastPrice)
