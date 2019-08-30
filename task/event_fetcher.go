@@ -248,7 +248,7 @@ func saveEventLogV1_1(eventLog types.Log) {
 		MakerGasFee:        decimal.NewFromBigInt(match.Result.MakerGasFee, int32(-quoteToken.Decimals)),
 		MakerRebate:        decimal.NewFromBigInt(match.Result.MakerRebate, int32(-quoteToken.Decimals)),
 		TakerGasFee:        decimal.NewFromBigInt(match.Result.TakerGasFee, int32(-quoteToken.Decimals)),
-		ProtocolVersion:    ProtocolV1_1,
+		ProtocolVersion:    ProtocolV1_2,
 	}
 
 	if err = models.DB.Where("block_number = ? AND log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
