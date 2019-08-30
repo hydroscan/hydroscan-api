@@ -60,7 +60,7 @@ func FetchHistoricalLogs(fetchAll bool) {
 	if fetchAll {
 		// fromBlock = HydroStartBlockNumberV1
 		//fromBlock = HydroStartBlockNumberV1_1
-		fromBlock = HydroStartBlockNumberV1_2
+		fromBlock = HydroStartBlockNumberV1_1_BFD
 	}
 
 	lastBlock := getLastBlockNumber()
@@ -99,14 +99,14 @@ func fetchLogs(fromBlock int64, toBlock int64) {
 
 	contractAddressV1 := common.HexToAddress(HydroExchangeAddressV1)
 	contractAddressV1_1 := common.HexToAddress(HydroExchangeAddressV1_1)
-	contractAddressV1_2 := common.HexToAddress(HydroExchangeAddressV1_2)
+	contractAddressV1_1_BFD := common.HexToAddress(HydroExchangeAddressV1_1_BFD)
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(fromBlock),
 		ToBlock:   big.NewInt(toBlock),
 		Addresses: []common.Address{
 			contractAddressV1,
 			contractAddressV1_1,
-			contractAddressV1_2,
+			contractAddressV1_1_BFD,
 		},
 	}
 
@@ -138,10 +138,10 @@ func saveEventLog(eventLog types.Log) {
 			saveEventLogV1(eventLog)
 		case HydroExchangeAddressV1_1:
 			log.Info("saveEventLogV1_1: ", eventLog.BlockNumber, eventLog.Index)
-			saveEventLogV1_1(eventLog)
-		case HydroExchangeAddressV1_2:
-			log.Info("saveEventLogV1_2: ", eventLog.BlockNumber, eventLog.Index)
-			saveEventLogV1_1(eventLog)
+			saveEventLogV1_1(eventLog, ProtocolV1_1)
+		case HydroExchangeAddressV1_1_BFD:
+			log.Info("saveEventLogV1_1_BFD: ", eventLog.BlockNumber, eventLog.Index)
+			saveEventLogV1_1(eventLog, ProtocolV1_1_BFD)
 		}
 	} else {
 		if eventLog.Removed {
@@ -205,7 +205,7 @@ func saveEventLogV1(eventLog types.Log) {
 	}
 }
 
-func saveEventLogV1_1(eventLog types.Log) {
+func saveEventLogV1_1(eventLog types.Log, protocolVersion string) {
 	//log.Info("saveEventLogV1_1: ", eventLog.BlockNumber, eventLog.Index)
 	mTrade := models.Trade{}
 	match := MatchEventV1_1{}
@@ -248,7 +248,7 @@ func saveEventLogV1_1(eventLog types.Log) {
 		MakerGasFee:        decimal.NewFromBigInt(match.Result.MakerGasFee, int32(-quoteToken.Decimals)),
 		MakerRebate:        decimal.NewFromBigInt(match.Result.MakerRebate, int32(-quoteToken.Decimals)),
 		TakerGasFee:        decimal.NewFromBigInt(match.Result.TakerGasFee, int32(-quoteToken.Decimals)),
-		ProtocolVersion:    ProtocolV1_2,
+		ProtocolVersion:    protocolVersion,
 	}
 
 	if err = models.DB.Where("block_number = ? AND log_index = ?", eventLog.BlockNumber, eventLog.Index).First(&mTrade).Error; gorm.IsRecordNotFoundError(err) {
