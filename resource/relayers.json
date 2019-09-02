@@ -12,9 +12,9 @@
     "address": "0xdD94B4B8BB7c94CAb388354BB36A0838b48A633C"
   },
   {
-    "name": "BFD",
-    "slug": "bfd",
-    "url": "https://ddex.io",
+    "name": "DDEX Margin",
+    "slug": "ddex_margin",
+    "url": "https://margin.ddex.io",
     "address": "0x6AC4Baab1D85C9CB390b2a353F242bEc056026FF"
   }
 ]
