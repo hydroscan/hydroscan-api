@@ -60,7 +60,7 @@ func FetchHistoricalLogs(fetchAll bool) {
 	if fetchAll {
 		// fromBlock = HydroStartBlockNumberV1
 		//fromBlock = HydroStartBlockNumberV1_1
-		fromBlock = HydroStartBlockNumberV1_1_BFD
+		fromBlock = HydroStartBlockNumberV2
 	}
 
 	lastBlock := getLastBlockNumber()
@@ -99,14 +99,14 @@ func fetchLogs(fromBlock int64, toBlock int64) {
 
 	contractAddressV1 := common.HexToAddress(HydroExchangeAddressV1)
 	contractAddressV1_1 := common.HexToAddress(HydroExchangeAddressV1_1)
-	contractAddressV1_1_BFD := common.HexToAddress(HydroExchangeAddressV1_1_BFD)
+	contractAddressV2 := common.HexToAddress(HydroExchangeAddressV2)
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(fromBlock),
 		ToBlock:   big.NewInt(toBlock),
 		Addresses: []common.Address{
 			contractAddressV1,
 			contractAddressV1_1,
-			contractAddressV1_1_BFD,
+			contractAddressV2,
 		},
 	}
 
@@ -139,9 +139,9 @@ func saveEventLog(eventLog types.Log) {
 		case HydroExchangeAddressV1_1:
 			log.Info("saveEventLogV1_1: ", eventLog.BlockNumber, eventLog.Index)
 			saveEventLogV1_1(eventLog, ProtocolV1_1)
-		case HydroExchangeAddressV1_1_BFD:
-			log.Info("saveEventLogV1_1_BFD: ", eventLog.BlockNumber, eventLog.Index)
-			saveEventLogV1_1(eventLog, ProtocolV1_1_BFD)
+		case HydroExchangeAddressV2:
+			log.Info("saveEventLogV2: ", eventLog.BlockNumber, eventLog.Index)
+			saveEventLogV1_1(eventLog, ProtocolV2)
 		}
 	} else {
 		if eventLog.Removed {
