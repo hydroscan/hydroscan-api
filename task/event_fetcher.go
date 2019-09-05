@@ -100,6 +100,11 @@ func fetchLogs(fromBlock int64, toBlock int64) {
 	contractAddressV1 := common.HexToAddress(HydroExchangeAddressV1)
 	contractAddressV1_1 := common.HexToAddress(HydroExchangeAddressV1_1)
 	contractAddressV2 := common.HexToAddress(HydroExchangeAddressV2)
+
+	topicV1 := common.HexToHash(HydroMatchTopicV1)
+	topicV1_1 := common.HexToHash(HydroMatchTopicV1_1)
+	topicV2 := common.HexToHash(HydroMatchTopicV2)
+
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(fromBlock),
 		ToBlock:   big.NewInt(toBlock),
@@ -107,6 +112,10 @@ func fetchLogs(fromBlock int64, toBlock int64) {
 			contractAddressV1,
 			contractAddressV1_1,
 			contractAddressV2,
+		},
+		// topics[0]
+		Topics: [][]common.Hash{
+			[]common.Hash{topicV1, topicV1_1, topicV2},
 		},
 	}
 
@@ -116,11 +125,11 @@ func fetchLogs(fromBlock int64, toBlock int64) {
 	}
 
 	for _, eventLog := range eventLogs {
-		saveEventLog(eventLog)
+		saveEventLog(&eventLog)
 	}
 }
 
-func saveEventLog(eventLog types.Log) {
+func saveEventLog(eventLog *types.Log) {
 	log.Info("saveEventLog: ", eventLog.BlockNumber, eventLog.Index)
 
 	mTrade := models.Trade{}
@@ -152,7 +161,7 @@ func saveEventLog(eventLog types.Log) {
 	}
 }
 
-func saveEventLogV1(eventLog types.Log) {
+func saveEventLogV1(eventLog *types.Log) {
 	log.Info("saveEventLogV1: ", eventLog.BlockNumber, eventLog.Index)
 
 	mTrade := models.Trade{}
@@ -205,7 +214,7 @@ func saveEventLogV1(eventLog types.Log) {
 	}
 }
 
-func saveEventLogV1_1(eventLog types.Log, protocolVersion string) {
+func saveEventLogV1_1(eventLog *types.Log, protocolVersion string) {
 	//log.Info("saveEventLogV1_1: ", eventLog.BlockNumber, eventLog.Index)
 	mTrade := models.Trade{}
 	match := MatchEventV1_1{}

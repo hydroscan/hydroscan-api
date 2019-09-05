@@ -78,7 +78,7 @@ func SubscribeLogs() {
 		case eventLog := <-eventLogs:
 			log.Info("receive log: ", eventLog.BlockNumber, eventLog.Index)
 			checkMissingBlocks(eventLog.BlockNumber)
-			saveEventLog(eventLog)
+			saveEventLog(&eventLog)
 
 		case <-time.After(60 * time.Second):
 			log.Info("timeout 1min retry dial")
