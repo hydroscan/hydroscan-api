@@ -1,8 +1,8 @@
 [
   {
-    "name": "DDEX",
+    "name": "DDEX Legacy",
     "slug": "ddex",
-    "url": "https://ddex.io",
+    "url": "https://legacy.ddex.io",
     "address": "0x49497a4D914ae91D34Ce80030fE620687Bf333FD"
   },
   {
@@ -14,7 +14,7 @@
   {
     "name": "DDEX Margin",
     "slug": "ddex_margin",
-    "url": "https://margin.ddex.io",
+    "url": "https://ddex.io",
     "address": "0x6AC4Baab1D85C9CB390b2a353F242bEc056026FF"
   }
 ]
