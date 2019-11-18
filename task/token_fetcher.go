@@ -65,27 +65,6 @@ func UpdateTokenPrices() {
 	for _, mToken := range mTokens {
 		tokenInfo := GetTokenInfo(mToken.Address)
 
-		// hacked for RING, can't get name and symbol
-		// https://etherscan.io/token/0x9469d013805bffb7d3debe5e7839237e535ec483#readContract
-		if mToken.Address == "0x9469D013805bFfB7D3DEBe5E7839237e535ec483" {
-			tokenInfo.Name = "Evolution Land Global Token"
-			tokenInfo.Symbol = "RING"
-		}
-		// https://etherscan.io/token/0xeb269732ab75A6fD61Ea60b06fE994cD32a83549#readContract
-		if mToken.Address == "0xeb269732ab75A6fD61Ea60b06fE994cD32a83549" {
-			tokenInfo.Name = "USDx"
-			tokenInfo.Symbol = "USDx"
-		}
-		// https://etherscan.io/token/0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0#readContract
-		if mToken.Address == "0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0" {
-			tokenInfo.Name = "dForce"
-			tokenInfo.Symbol = "DF"
-		}
-		// https://etherscan.io/token/0x2630997aAB62fA1030a8b975e1AA2dC573b18a13#readContract
-		if mToken.Address == "0x2630997aAB62fA1030a8b975e1AA2dC573b18a13" {
-			tokenInfo.Name = "HYPE Token"
-			tokenInfo.Symbol = "HYPE"
-		}
 		models.DB.Model(&mToken).Updates(models.Token{
 			Name:           tokenInfo.Name,
 			Symbol:         tokenInfo.Symbol,
@@ -98,11 +77,19 @@ func UpdateTokenPrices() {
 }
 
 func GetTokenInfo(address string) TokenInfo {
-	// old TUSD
+	// old TUSD, ethplorer doesn't have this token
 	if address == "0x8dd5fbCe2F6a956C3022bA3663759011Dd51e73E" {
 		// TUSD
 		address = "0x0000000000085d4780B73119b644AE5ecd22b376"
 	}
+
+	// https://changelog.makerdao.com/releases/mainnet/1.0.0/contracts.json
+	// new DAI, MCD_DAI, ethplorer doesn't have this token
+	if address == "0x6B175474E89094C44Da98b954EedeAC495271d0F" {
+		// old DAI
+		address = "0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359"
+	}
+
 	tokenInfo := TokenInfo{}
 
 	if address == "0x000000000000000000000000000000000000000E" {
@@ -128,7 +115,7 @@ func GetTokenInfo(address string) TokenInfo {
 	if tokenInfo.Decimals == "" {
 		tokenInfo.Decimals = fmt.Sprint(tokenInfo.DecimalsInterface)
 	}
-	// get ETH price for WETH
+	// get ETH price for WETH and ETH
 	if tokenInfo.Symbol == "WETH" || tokenInfo.Symbol == "ETH" {
 		lastPrice := getETHLastPrice()
 		log.Info("WETH Price: ", tokenInfo.Price)
@@ -136,6 +123,34 @@ func GetTokenInfo(address string) TokenInfo {
 		if !lastPrice.Rate.IsZero() {
 			tokenInfo.Price = lastPrice
 		}
+	}
+
+	// old DAI => SAI
+	if address == "0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359" {
+		tokenInfo.Name = "SAI"
+		tokenInfo.Symbol = "SAI"
+	}
+
+	// these tokens' name and symbol are not string
+	// https://etherscan.io/token/0x9469d013805bffb7d3debe5e7839237e535ec483#readContract
+	if address == "0x9469D013805bFfB7D3DEBe5E7839237e535ec483" {
+		tokenInfo.Name = "Evolution Land Global Token"
+		tokenInfo.Symbol = "RING"
+	}
+	// https://etherscan.io/token/0xeb269732ab75A6fD61Ea60b06fE994cD32a83549#readContract
+	if address == "0xeb269732ab75A6fD61Ea60b06fE994cD32a83549" {
+		tokenInfo.Name = "USDx"
+		tokenInfo.Symbol = "USDx"
+	}
+	// https://etherscan.io/token/0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0#readContract
+	if address == "0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0" {
+		tokenInfo.Name = "dForce"
+		tokenInfo.Symbol = "DF"
+	}
+	// https://etherscan.io/token/0x2630997aAB62fA1030a8b975e1AA2dC573b18a13#readContract
+	if address == "0x2630997aAB62fA1030a8b975e1AA2dC573b18a13" {
+		tokenInfo.Name = "HYPE Token"
+		tokenInfo.Symbol = "HYPE"
 	}
 
 	return tokenInfo
