@@ -83,13 +83,6 @@ func GetTokenInfo(address string) TokenInfo {
 		address = "0x0000000000085d4780B73119b644AE5ecd22b376"
 	}
 
-	// https://changelog.makerdao.com/releases/mainnet/1.0.0/contracts.json
-	// new DAI, MCD_DAI, ethplorer doesn't have this token
-	if address == "0x6B175474E89094C44Da98b954EedeAC495271d0F" {
-		// old DAI
-		address = "0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359"
-	}
-
 	tokenInfo := TokenInfo{}
 
 	if address == "0x000000000000000000000000000000000000000E" {
@@ -123,12 +116,6 @@ func GetTokenInfo(address string) TokenInfo {
 		if !lastPrice.Rate.IsZero() {
 			tokenInfo.Price = lastPrice
 		}
-	}
-
-	// old DAI => SAI
-	if address == "0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359" {
-		tokenInfo.Name = "SAI"
-		tokenInfo.Symbol = "SAI"
 	}
 
 	// these tokens' name and symbol are not string

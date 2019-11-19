@@ -144,6 +144,7 @@ func saveEventLog(eventLog *types.Log) {
 
 		switch eventLog.Address.Hex() {
 		case HydroExchangeAddressV1:
+			log.Info("saveEventLogV1: ", eventLog.BlockNumber, eventLog.Index)
 			saveEventLogV1(eventLog)
 		case HydroExchangeAddressV1_1:
 			log.Info("saveEventLogV1_1: ", eventLog.BlockNumber, eventLog.Index)
@@ -162,8 +163,6 @@ func saveEventLog(eventLog *types.Log) {
 }
 
 func saveEventLogV1(eventLog *types.Log) {
-	log.Info("saveEventLogV1: ", eventLog.BlockNumber, eventLog.Index)
-
 	mTrade := models.Trade{}
 	match := MatchEventV1{}
 	err = contractABIV1.Unpack(&match, "Match", eventLog.Data)
