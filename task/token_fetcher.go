@@ -65,6 +65,10 @@ func UpdateTokenPrices() {
 	for _, mToken := range mTokens {
 		tokenInfo := GetTokenInfo(mToken.Address)
 
+		if tokenInfo.Symbol == "-" {
+			continue
+		}
+
 		models.DB.Model(&mToken).Updates(models.Token{
 			Name:           tokenInfo.Name,
 			Symbol:         tokenInfo.Symbol,
@@ -83,7 +87,12 @@ func GetTokenInfo(address string) TokenInfo {
 		address = "0x0000000000085d4780B73119b644AE5ecd22b376"
 	}
 
+	tokenPrice := TokenPrice{Rate: decimal.NewFromFloat(0), TS: 0}
+
 	tokenInfo := TokenInfo{}
+	tokenInfo.Symbol = "-"
+	tokenInfo.Name = "-"
+	tokenInfo.Price = tokenPrice
 
 	if address == "0x000000000000000000000000000000000000000E" {
 		tokenInfo.Symbol = "ETH"
@@ -94,20 +103,30 @@ func GetTokenInfo(address string) TokenInfo {
 		url := "http://api.ethplorer.io/getTokenInfo/" + address + "?apiKey=" + viper.GetString("ethplorer_apikey")
 		resp, err := http.Get(url)
 		if err != nil {
-			panic(err)
+			tokenInfo.Decimals = "0"
+			return tokenInfo
 		}
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			panic(err)
+			tokenInfo.Decimals = "0"
+			return tokenInfo
 		}
 		json.Unmarshal([]byte(body), &tokenInfo)
+		log.Info("tokenInfo:")
+		log.Info(tokenInfo.Symbol)
+		log.Info(tokenInfo.Name)
 	}
 
 	// ethplorer api return decimals type can be string or number
 	if tokenInfo.Decimals == "" {
 		tokenInfo.Decimals = fmt.Sprint(tokenInfo.DecimalsInterface)
 	}
+	if tokenInfo.Decimals == "" || tokenInfo.Decimals == "<nil>" {
+		tokenInfo.Decimals = "0"
+	}
+	log.Info("decimals:", tokenInfo.Decimals)
+
 	// get ETH price for WETH and ETH
 	if tokenInfo.Symbol == "WETH" || tokenInfo.Symbol == "ETH" {
 		lastPrice := getETHLastPrice()
