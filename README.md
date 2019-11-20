@@ -4,6 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/hydroscan/hydroscan-api)](https://goreportcard.com/report/github.com/hydroscan/hydroscan-api)
 [![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/hydroscanio/hydroscan-api.svg)](https://hub.docker.com/r/hydroscanio/hydroscan-api)
 [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/hydroscanio/hydroscan-api.svg)](https://hub.docker.com/r/hydroscanio/hydroscan-api)
+[![Uptime Robot status](https://img.shields.io/uptimerobot/status/m782290067-dff6909eff9f905729fcfc92.svg)](https://hydroscan.io)	
 
 > The HydroScan backend built with Go. Collects data about Hydro Protocol exchanges and provides methods for a client to consume the data.
 
