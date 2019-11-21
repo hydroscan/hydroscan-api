@@ -11,3 +11,5 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /app/resource /resource/
 COPY --from=builder /bin/cron /bin/cron
 COPY --from=builder /bin/server /bin/server
+RUN addgroup -S appuser && adduser -S -G appuser appuser
+USER appuser
